@@ -349,20 +349,20 @@ const PALETTE = [
 
 /* ─── Defaults ───────────────────────────────────────────────────── */
 const DEFAULT_PEOPLE = [
-  {id:'p1',  name:'Kripa',          color:'#E8665A'},
-  {id:'p2',  name:'Raeesa',         color:'#E8836A'},
-  {id:'p3',  name:'Shashank',       color:'#C9A227'},
-  {id:'p4',  name:'Ruchika',        color:'#5AAF6E'},
-  {id:'p5',  name:'Anmol',          color:'#4A9CC4'},
-  {id:'p6',  name:'Sumeet',         color:'#6DB3D4'},
-  {id:'p7',  name:'Akshay',         color:'#9B7EC8'},
-  {id:'p8',  name:'Marketing Team', color:'#8B90A2'},
-  {id:'p9',  name:'Product Team',   color:'#D95F5F'},
-  {id:'p10', name:'Mustakim',       color:'#7A8A8E'},
-  {id:'p11', name:'Abhishek S',     color:'#6B7A8E'},
-  {id:'p12', name:'Ankita',         color:'#78A87A'},
-  {id:'p13', name:'Saleen',         color:'#E8923A'},
-  {id:'p14', name:'Sonali',         color:'#8A9BAA'},
+  {id:'p1',  name:'Kripa',          color:'#E8665A', email:''},
+  {id:'p2',  name:'Raeesa',         color:'#E8836A', email:''},
+  {id:'p3',  name:'Shashank',       color:'#C9A227', email:''},
+  {id:'p4',  name:'Ruchika',        color:'#5AAF6E', email:''},
+  {id:'p5',  name:'Anmol',          color:'#4A9CC4', email:''},
+  {id:'p6',  name:'Sumeet',         color:'#6DB3D4', email:''},
+  {id:'p7',  name:'Akshay',         color:'#9B7EC8', email:''},
+  {id:'p8',  name:'Marketing Team', color:'#8B90A2', email:''},
+  {id:'p9',  name:'Product Team',   color:'#D95F5F', email:''},
+  {id:'p10', name:'Mustakim',       color:'#7A8A8E', email:''},
+  {id:'p11', name:'Abhishek S',     color:'#6B7A8E', email:''},
+  {id:'p12', name:'Ankita',         color:'#78A87A', email:''},
+  {id:'p13', name:'Saleen',         color:'#E8923A', email:''},
+  {id:'p14', name:'Sonali',         color:'#8A9BAA', email:''},
 ];
 
 const STATUS_CLASSES = {
@@ -468,6 +468,45 @@ function statusBadge(s){
   return `<span class="status-sel ${cls}">${dot} ${esc(s)}</span>`;
 }
 
+/* ─── Follow-up email ────────────────────────────────────────────── */
+function followUpMailto(r){
+  const assigned = [...(r.stakeholders||[]), ...(r.nextStep||[])].map(id => personById(id)).filter(Boolean);
+  const to = [...new Set(assigned.map(p => p.email).filter(Boolean))].join(',');
+  const dp = daysPassed(r.dateOfDisc);
+  const subject = `Follow-up: ${r.actionItem.length > 60 ? r.actionItem.slice(0,57)+'…' : r.actionItem}`;
+  const body = [
+    `Hi,`,
+    ``,
+    `Following up on this action item:`,
+    `"${r.actionItem}"`,
+    ``,
+    `Function: ${r.function || '—'}`,
+    `Status: ${r.status}`,
+    `Raised on: ${fmtDate(r.dateOfDisc)} (${dp} day${dp===1?'':'s'} ago)`,
+    r.remarks ? `Remarks: ${r.remarks}` : null,
+    ``,
+    `Could you share a quick update on where this stands?`,
+    ``,
+    `Thanks!`
+  ].filter(x => x !== null).join('\n');
+  return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+function sendFollowUp(id){
+  const r = state.items.find(x => x.id === id);
+  if(!r) return;
+  const assigned = [...(r.stakeholders||[]), ...(r.nextStep||[])].map(pid => personById(pid)).filter(Boolean);
+  const hasEmail = assigned.some(p => p.email);
+  window.location.href = followUpMailto(r);
+  r.lastFollowUp = todayISO();
+  saveState(); render();
+  toast(hasEmail ? 'Follow-up email opened — logged as followed up today' : 'Follow-up draft opened (no emails on file — add them in Manage People) — logged as followed up today');
+}
+
+function followUpNote(r){
+  return r.lastFollowUp ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">✉ Followed up ${fmtDate(r.lastFollowUp)}</div>` : '';
+}
+
 /* ─── View mode ──────────────────────────────────────────────────── */
 let viewMode = 'list'; // 'list' | 'kanban'
 const KANBAN_STATUSES = ['Not Started','In Progress','In Progress - Delayed','Open','Done','Blocked'];
@@ -525,14 +564,16 @@ function renderTable(){
       <td><div class="people-wrap">${stake.map(p=>personChipHTML(p)).join('')||'<span style="color:var(--muted)">—</span>'}</div></td>
       <td><div class="people-wrap">${next.map(p=>personChipHTML(p)).join('')||'<span style="color:var(--muted)">—</span>'}</div></td>
       <td class="status-cell">${statusBadge(r.status)}</td>
-      <td class="remarks-cell">${esc(r.remarks||'—')}</td>
+      <td class="remarks-cell">${esc(r.remarks||'—')}${followUpNote(r)}</td>
       <td><div style="display:flex;gap:4px">
+        <button class="btn sm" data-followup="${r.id}" title="Send follow-up email">✉</button>
         <button class="btn sm" data-edit="${r.id}">Edit</button>
         <button class="btn sm" data-del="${r.id}" style="color:var(--bad)">✕</button>
       </div></td>
     </tr>`;
   }).join('');
 
+  tbody.querySelectorAll('[data-followup]').forEach(b => b.onclick = () => sendFollowUp(b.dataset.followup));
   tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openItemModal(b.dataset.edit));
   tbody.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
     if(confirm('Delete this action item?')){
@@ -566,11 +607,13 @@ function kanbanCardHTML(r){
     <div class="kc-foot">
       ${daysBadge(dp)}
       <div style="display:flex;gap:4px">
+        <button class="btn sm" data-followup="${r.id}" title="Send follow-up email">✉</button>
         <button class="btn sm" data-edit="${r.id}">Edit</button>
         <button class="btn sm" data-del="${r.id}" style="color:var(--bad)">✕</button>
       </div>
     </div>
     ${r.remarks ? `<div class="kc-remarks">${esc(r.remarks)}</div>` : ''}
+    ${followUpNote(r)}
   </div>`;
 }
 
@@ -587,6 +630,7 @@ function renderKanban(){
     </section>`;
   }).join('');
 
+  board.querySelectorAll('[data-followup]').forEach(b => b.onclick = () => sendFollowUp(b.dataset.followup));
   board.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openItemModal(b.dataset.edit));
   board.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
     if(confirm('Delete this action item?')){
@@ -712,7 +756,7 @@ function openItemModal(id){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="field"><label>Status</label>
         <select id="fStatus">
-          ${['In Progress','In Progress - Delayed','Not Started','Open','Done','Blocked'].map(s=>`<option ${(existing?.status||'Open')===s?'selected':''}>${s}</option>`).join('')}
+          ${['In Progress','In Progress - Delayed','Not Started','Open','Done','Blocked'].map(s=>`<option ${(existing?.status||'Not Started')===s?'selected':''}>${s}</option>`).join('')}
         </select></div>
       <div class="field"><label>Expected Timeline / Remarks</label>
         <input id="fRemarks" value="${esc(existing?.remarks||'')}" placeholder="e.g. Present RCA by 15 Jul"></div>
@@ -750,17 +794,21 @@ function renderPeoplePanel(){
     <div class="manage-people">
       <h4>Team members (${state.people.length})</h4>
       ${state.people.map(p => `
-        <div class="person-row" data-pid="${p.id}">
-          <span class="av" style="background:${p.color};width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">${esc(initials(p.name))}</span>
-          <input class="pname-input" data-pid="${p.id}" value="${esc(p.name)}" style="flex:1;padding:5px 8px">
-          <div style="display:flex;gap:4px;flex-wrap:wrap;max-width:160px">
-            ${PALETTE.map(c => `<button class="color-swatch ${p.color===c?'active':''}" data-pid="${p.id}" data-color="${c}" style="background:${c}" title="${c}"></button>`).join('')}
+        <div class="person-row" data-pid="${p.id}" style="flex-direction:column;align-items:stretch;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="av" style="background:${p.color};width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">${esc(initials(p.name))}</span>
+            <input class="pname-input" data-pid="${p.id}" value="${esc(p.name)}" style="flex:1;padding:5px 8px">
+            <div style="display:flex;gap:4px;flex-wrap:wrap;max-width:160px">
+              ${PALETTE.map(c => `<button class="color-swatch ${p.color===c?'active':''}" data-pid="${p.id}" data-color="${c}" style="background:${c}" title="${c}"></button>`).join('')}
+            </div>
+            <button class="btn sm danger" data-delperson="${p.id}" style="color:var(--bad);flex-shrink:0" title="Remove person">✕</button>
           </div>
-          <button class="btn sm danger" data-delperson="${p.id}" style="color:var(--bad);flex-shrink:0" title="Remove person">✕</button>
+          <input class="pemail-input" type="email" data-pid="${p.id}" value="${esc(p.email||'')}" placeholder="email@example.com (for follow-ups)" style="margin-left:38px;width:calc(100% - 38px);padding:5px 8px;font-size:12.5px">
         </div>`).join('')}
     </div>
     <div id="addPersonForm" style="display:none;border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px;flex-direction:column;gap:10px">
       <div class="field"><label>Name</label><input id="newPersonName" placeholder="Full name or role"></div>
+      <div class="field"><label>Email <span>(optional, for follow-ups)</span></label><input id="newPersonEmail" type="email" placeholder="email@example.com"></div>
       <div class="field"><label>Colour</label>
         <div style="display:flex;gap:5px;flex-wrap:wrap" id="newColorPalette">
           ${PALETTE.map((c,i) => `<button class="color-swatch ${i===0?'active':''}" data-nc="${c}" style="background:${c}"></button>`).join('')}
@@ -773,14 +821,21 @@ function renderPeoplePanel(){
   body.querySelectorAll('.pname-input').forEach(inp => {
     inp.onblur = () => {
       const p = state.people.find(x=>x.id===inp.dataset.pid);
-      if(p){ p.name = inp.value.trim() || p.name; saveState(); refreshPeopleFilter(); renderTable(); }
+      if(p){ p.name = inp.value.trim() || p.name; saveState(); refreshPeopleFilter(); renderCurrentView(); }
+    };
+  });
+  // email edit
+  body.querySelectorAll('.pemail-input').forEach(inp => {
+    inp.onblur = () => {
+      const p = state.people.find(x=>x.id===inp.dataset.pid);
+      if(p){ p.email = inp.value.trim(); saveState(); }
     };
   });
   // colour picker
   body.querySelectorAll('.color-swatch[data-color]').forEach(sw => {
     sw.onclick = () => {
       const p = state.people.find(x=>x.id===sw.dataset.pid);
-      if(p){ p.color = sw.dataset.color; saveState(); renderPeoplePanel(); renderTable(); }
+      if(p){ p.color = sw.dataset.color; saveState(); renderPeoplePanel(); renderCurrentView(); }
     };
   });
   // delete person
@@ -793,7 +848,7 @@ function renderPeoplePanel(){
         r.stakeholders = (r.stakeholders||[]).filter(id=>id!==pid);
         r.nextStep = (r.nextStep||[]).filter(id=>id!==pid);
       });
-      saveState(); renderPeoplePanel(); refreshPeopleFilter(); renderTable();
+      saveState(); renderPeoplePanel(); refreshPeopleFilter(); renderCurrentView();
       toast('Person removed');
     };
   });
@@ -816,7 +871,8 @@ function renderPeoplePanel(){
   document.getElementById('saveNewPerson').onclick = () => {
     const name = document.getElementById('newPersonName').value.trim();
     if(!name){ toast('Enter a name'); return; }
-    const np = { id: uid(), name, color: newColor };
+    const email = document.getElementById('newPersonEmail').value.trim();
+    const np = { id: uid(), name, color: newColor, email };
     state.people.push(np);
     saveState(); renderPeoplePanel(); refreshPeopleFilter();
     toast(`${name} added`);
