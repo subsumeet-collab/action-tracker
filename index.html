@@ -212,7 +212,7 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
     <input type="search" id="searchBox" placeholder="Search action items…">
     <select id="fltStatus"><option value="">All statuses</option><option>In Progress</option><option>In Progress - Delayed</option><option>Not Started</option><option>Open</option><option>Done</option><option>Blocked</option></select>
     <select id="fltPerson"><option value="">All people</option></select>
-    <select id="fltFunction"><option value="">All functions</option><option>Donor Marketing</option><option>Operations</option><option>Finance</option><option>Technology</option><option>HR</option></select>
+    <select id="fltFunction"><option value="">All functions</option><option>Performance Marketing</option><option>Retention Marketing</option><option>New Channels</option><option>Help from Other Departments</option></select>
     <select id="fltType"><option value="">All types</option><option>Action Pointer</option><option>Decision</option><option>Risk</option><option>FYI</option></select>
     <button class="btn sm" id="clearFlt">Clear</button>
     <span id="rowCount" style="margin-left:auto;font-size:12px;color:var(--muted)"></span>
@@ -288,7 +288,7 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
       <div class="field">
         <label>Function / Department</label>
         <select id="importFunction">
-          <option>Donor Marketing</option><option>Operations</option><option>Finance</option><option>Technology</option><option>HR</option>
+          <option>Performance Marketing</option><option>Retention Marketing</option><option>New Channels</option><option>Help from Other Departments</option>
         </select>
       </div>
       <div class="field">
@@ -363,11 +363,20 @@ const DEFAULT_PEOPLE = [
   {id:'p12', name:'Ankita',         color:'#78A87A', email:''},
   {id:'p13', name:'Saleen',         color:'#E8923A', email:''},
   {id:'p14', name:'Sonali',         color:'#8A9BAA', email:''},
+  {id:'p15', name:'Tanvika',        color:'#C77DBB', email:''},
+  {id:'p16', name:'Bhardwaj',       color:'#5C9EAD', email:''},
+  {id:'p17', name:'Sandeep',        color:'#B98D3E', email:''},
+  {id:'p18', name:'Neer',           color:'#7A93C4', email:''},
+  {id:'p19', name:'Sahil',          color:'#4FA37A', email:''},
+  {id:'p20', name:'Akhlaque',       color:'#C46B5C', email:''},
+  {id:'p21', name:'Dr Ajay',        color:'#8F6BC4', email:''},
 ];
 
 const STATUS_CLASSES = {
   'In Progress':'s-inprogress','In Progress - Delayed':'s-delayed','Not Started':'s-notstarted','Open':'s-open','Done':'s-done','Blocked':'s-blocked'
 };
+
+const SEED_VERSION = 3;
 
 /* ─── State ──────────────────────────────────────────────────────── */
 let state = null;
@@ -379,8 +388,8 @@ async function loadState(){
       const r = await window.storage.get('action-tracker');
       if(r?.value){
         const saved = JSON.parse(r.value);
-        if((saved.version||1) >= 2) return saved;
-        // version < 2 → wipe old data and re-seed with correct people & items
+        if((saved.version||1) >= SEED_VERSION) return saved;
+        // stale seed version → wipe old data and re-seed with correct people & items
         await window.storage.delete('action-tracker');
       }
     }catch(e){}
@@ -392,45 +401,149 @@ async function saveState(){
 }
 
 function seed(){
+  const T = todayISO();
   const items = [
-    /* ── 9th Feb 2026 ── */
-    {id:'i1', dateOfDisc:'2026-02-09', function:'Donor Marketing', type:'Learning/Discussion',
-     actionItem:'New acquisition increased by 70% in a specific campaign where negations are there',
-     stakeholders:['p3'], nextStep:[], status:'Open', remarks:''},
-    {id:'i2', dateOfDisc:'2026-02-09', function:'Donor Marketing', type:'Action Pointer',
-     actionItem:'Need to solve for quantum & quality for all the cases coming in',
-     stakeholders:['p6','p2'], nextStep:['p6'], status:'In Progress', remarks:''},
-    {id:'i3', dateOfDisc:'2026-02-09', function:'Donor Marketing', type:'Learning/Discussion',
-     actionItem:'PHC needs massive work on content side',
-     stakeholders:['p2'], nextStep:[], status:'Open', remarks:''},
-    {id:'i4', dateOfDisc:'2026-02-09', function:'Donor Marketing', type:'Action Pointer',
-     actionItem:'IP Based tracking for donors in not working, Need to fix this via product',
-     stakeholders:['p6'], nextStep:['p6'], status:'Open', remarks:'BRD to be raised today, Discussion to be also done'},
-    /* ── 12th Feb 2026 ── */
-    {id:'i5', dateOfDisc:'2026-02-12', function:'Donor Marketing', type:'Action Pointer',
-     actionItem:'Ramzan angles - Needs to ramp up - 10 cases list',
-     stakeholders:[], nextStep:[], status:'Open', remarks:''},
-    {id:'i6', dateOfDisc:'2026-02-12', function:'Donor Marketing', type:'Action Pointer',
-     actionItem:"Valentine's day - Are there cases? Kripa, Raeesa, Vikram to curate cases - 10 Cases list",
-     stakeholders:[], nextStep:[], status:'Open', remarks:''},
-    /* ── 20th Feb 2026 ── */
-    {id:'i7', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Action Pointer',
-     actionItem:'Ramzan angles - Needs to ramp up',
-     stakeholders:['p1','p2'], nextStep:['p1'], status:'In Progress', remarks:'there are only a few tweaks done, This lists needs to ramp up'},
-    {id:'i8', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Learning/Discussion',
-     actionItem:'ROAS dipped too much on friday evening, saturday was entirely very poor ~0.78 ROAS. This continues to be the case. Needs to be rectified',
-     stakeholders:[], nextStep:[], status:'Open', remarks:''},
-    {id:'i9', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Action Pointer',
-     actionItem:'Data - for full funnel for all donor marketing pages/cases - to be completed',
-     stakeholders:['p5'], nextStep:['p5'], status:'Done', remarks:''},
-    {id:'i10', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Action Pointer',
-     actionItem:'IP Based tracking for donors in not working, Need to fix this via product',
-     stakeholders:['p6'], nextStep:['p6'], status:'Open', remarks:'Fix has been implemented by product; Need to be tested'},
-    {id:'i11', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Action Pointer',
-     actionItem:'PHC Creatives need to ramp up',
-     stakeholders:['p2'], nextStep:['p2'], status:'In Progress - Delayed', remarks:'Updates expected by Saturday on new deliverables'},
+    /* ── Performance Marketing ── */
+    {id:'i1', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Add ROAS to the email and WhatsApp reporting slide',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i2', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Add domestic/international split to reporting slide',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: KJ'},
+    {id:'i3', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Improve landing page ROI (raise story-page trust factor from 6 to 8) and revamp the landing page',
+     stakeholders:['p15'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ, KJ, VK'},
+    {id:'i4', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Define end goal for the multi-patient experiment (IGKart) before proceeding',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i5', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Obtain industry benchmark for hold-through rate and report back',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i6', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Review Hardik and Paramjit data; report back on hold-through rate and CTR',
+     stakeholders:['p6'], nextStep:['p5'], status:'Not Started', remarks:'Directive: KJ, VK'},
+    {id:'i7', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Run a video-only test to isolate hook-through and hook rate impact',
+     stakeholders:['p6'], nextStep:['p2'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i8', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Deep-dive domestic ROAS, April-June comparison, with strategic to-dos',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i9', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Recheck whether CAC rose in line with CPM, Q1 vs Q4',
+     stakeholders:['p6'], nextStep:['p5'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i10', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Share the cause-based ad (created for Sandeep) with KJ',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: KJ'},
+    {id:'i11', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Check non-ImpactGuru domain ad sets to improve hold-through/hook rate',
+     stakeholders:['p6'], nextStep:['p4'], status:'Not Started', remarks:'Directive: Sandeep'},
+    {id:'i12', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Prioritise the first 3 seconds of Meta ad creatives',
+     stakeholders:['p6'], nextStep:['p2'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i13', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Test the Flexi-gem experience',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i14', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Define specific strategies for controlling costs',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i15', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Assess time spent on revamps versus fresh cases and report back',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i16', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Keep Impactkart (IGKart) scope limited',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
+
+    /* ── Retention Marketing ── */
+    {id:'i17', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
+     actionItem:'Add push notification data to the next quarterly review',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: KJ'},
+    {id:'i18', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
+     actionItem:'Launch app push notifications',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i19', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
+     actionItem:'Launch Chrome notifications',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i20', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
+     actionItem:'Reduce dependency on WhatsApp (pricing set to ~2x) by diversifying into RCS, SMS, in-app, and web push',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i21', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
+     actionItem:'Build clear cost segregation and an LTV/repeat-donor ROAS view',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i22', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
+     actionItem:'Define end-stage goal for the donor app',
+     stakeholders:['p12'], nextStep:['p6'], status:'Not Started', remarks:'Directive: VK, Pankaj'},
+    {id:'i23', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
+     actionItem:'Explore donor engagement approach',
+     stakeholders:['p12'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i24', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
+     actionItem:'Use video-engagement spark line data to guide revamp decisions',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
+    {id:'i25', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
+     actionItem:'Further optimise the WhatsApp channel and define the donor app investment plan',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: PJ'},
+
+    /* ── New Channels ── */
+    {id:'i26', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Restart YouTube push (creatives and videos); pursue agency account for YT Performance Max',
+     stakeholders:['p6'], nextStep:['p4'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i27', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Push Google for faster ad account approvals',
+     stakeholders:['p6'], nextStep:['p4'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i28', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Test Snapchat',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: AK'},
+    {id:'i29', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Explore LinkedIn and news/publisher-style channels; assign an owner',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i30', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Run the checkout charity experiment',
+     stakeholders:['p17'], nextStep:['p16'], status:'Not Started', remarks:'Directive: Bhardwaj'},
+    {id:'i31', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Launch native ad pilots (MGID, Taboola, Criteo/Tyroo, Outbrain/Tyroo, RTB House) for reach and remarketing',
+     stakeholders:['p6'], nextStep:['p4'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i32', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Launch influencer pilot (awareness/engagement, alternate video starts); sourcing creators',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: Sandeep, KJ'},
+    {id:'i33', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Launch advertorials pilot',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i34', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Launch Quora content marketing pilot',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i35', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Launch Reddit content marketing pilot',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i36', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
+     actionItem:'Check with the BW team on their capacity to develop new channels',
+     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
+
+    /* ── Help from Other Departments ── */
+    {id:'i37', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
+     actionItem:'Link creative-team incentives to hook and hold rate performance; publish data',
+     stakeholders:['p6'], nextStep:['p2'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i38', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
+     actionItem:'Create guides, videos, and SOPs for BD and hospital POC',
+     stakeholders:['p6'], nextStep:['p7'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i39', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
+     actionItem:'Add PDF to the BD app across BD flows',
+     stakeholders:['p18','p19'], nextStep:['p15'], status:'Not Started', remarks:'Directive: Tanvika'},
+    {id:'i40', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
+     actionItem:'Research retention practices at Zepto and similar companies; arrange an interview',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i41', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
+     actionItem:'Audit wasteful retention spend with external experts',
+     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i42', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
+     actionItem:'Hire 3-4 new field agents',
+     stakeholders:['p18','p19'], nextStep:['p20'], status:'Not Started', remarks:'Directive: PJ'},
+    {id:'i43', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
+     actionItem:'Build domestic and international event calendar (2 months ahead); share with BD, Creative, Marketing',
+     stakeholders:['p6'], nextStep:['p7'], status:'Not Started', remarks:'Directive: KJ'},
+    {id:'i44', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
+     actionItem:'Sort pending updates and settlements',
+     stakeholders:['p12'], nextStep:['p21'], status:'Not Started', remarks:'Directive: Ankita'},
   ];
-  return { version:2, people: DEFAULT_PEOPLE, items };
+  return { version:SEED_VERSION, people: DEFAULT_PEOPLE, items };
 }
 
 const uid = () => 'x' + Math.random().toString(36).slice(2,9);
@@ -740,7 +853,7 @@ function openItemModal(id){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="field"><label>Function</label>
         <select id="fFunc">
-          ${['Donor Marketing','Operations','Finance','Technology','HR'].map(f=>`<option ${(existing?.function||'Donor Marketing')===f?'selected':''}>${f}</option>`).join('')}
+          ${['Performance Marketing','Retention Marketing','New Channels','Help from Other Departments'].map(f=>`<option ${(existing?.function||'Performance Marketing')===f?'selected':''}>${f}</option>`).join('')}
         </select></div>
       <div class="field"><label>Type</label>
         <select id="fType">
