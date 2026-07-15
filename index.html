@@ -587,7 +587,7 @@ function statusBadge(s){
 /* ─── Follow-up email ────────────────────────────────────────────── */
 const FOLLOWUP_CC = 'sumeet.tripathy@impactguru.com';
 
-function followUpMailto(r){
+function followUpComposeUrl(r){
   const assigned = [...(r.stakeholders||[]), ...(r.nextStep||[])].map(id => personById(id)).filter(Boolean);
   const to = [...new Set(assigned.map(p => p.email).filter(Boolean))].join(',');
   const dp = daysPassed(r.dateOfDisc);
@@ -607,7 +607,8 @@ function followUpMailto(r){
     ``,
     `Thanks!`
   ].filter(x => x !== null).join('\n');
-  return `mailto:${to}?cc=${encodeURIComponent(FOLLOWUP_CC)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const params = new URLSearchParams({ view:'cm', fs:'1', to, cc: FOLLOWUP_CC, su: subject, body });
+  return `https://mail.google.com/mail/?${params.toString()}`;
 }
 
 function sendFollowUp(id){
@@ -615,10 +616,10 @@ function sendFollowUp(id){
   if(!r) return;
   const assigned = [...(r.stakeholders||[]), ...(r.nextStep||[])].map(pid => personById(pid)).filter(Boolean);
   const hasEmail = assigned.some(p => p.email);
-  window.location.href = followUpMailto(r);
+  window.open(followUpComposeUrl(r), '_blank', 'noopener');
   r.lastFollowUp = todayISO();
   saveState(); render();
-  toast(hasEmail ? 'Follow-up email opened — logged as followed up today' : 'Follow-up draft opened (no emails on file — add them in Manage People) — logged as followed up today');
+  toast(hasEmail ? 'Gmail compose opened in a new tab — logged as followed up today' : 'Gmail compose opened (no emails on file — add them in Manage People) — logged as followed up today');
 }
 
 function followUpNote(r){
