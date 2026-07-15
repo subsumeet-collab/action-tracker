@@ -410,6 +410,9 @@ function seed(){
     {id:'i2', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
      actionItem:'Add domestic/international split to reporting slide',
      stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: KJ'},
+    {id:'i45', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
+     actionItem:'Report ROAS of intl and dom separately',
+     stakeholders:['p6'], nextStep:['p5'], status:'Not Started', remarks:'Directive: KJ'},
     {id:'i3', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
      actionItem:'Improve landing page ROI (raise story-page trust factor from 6 to 8) and revamp the landing page',
      stakeholders:['p15'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ, KJ, VK'},
@@ -582,6 +585,8 @@ function statusBadge(s){
 }
 
 /* ─── Follow-up email ────────────────────────────────────────────── */
+const FOLLOWUP_CC = 'sumeet.tripathy@impactguru.com';
+
 function followUpMailto(r){
   const assigned = [...(r.stakeholders||[]), ...(r.nextStep||[])].map(id => personById(id)).filter(Boolean);
   const to = [...new Set(assigned.map(p => p.email).filter(Boolean))].join(',');
@@ -602,7 +607,7 @@ function followUpMailto(r){
     ``,
     `Thanks!`
   ].filter(x => x !== null).join('\n');
-  return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return `mailto:${to}?cc=${encodeURIComponent(FOLLOWUP_CC)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 function sendFollowUp(id){
