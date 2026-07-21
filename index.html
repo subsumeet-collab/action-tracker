@@ -380,24 +380,24 @@ const SEED_VERSION = 3;
 
 /* ─── State ──────────────────────────────────────────────────────── */
 let state = null;
-const hasStorage = typeof window.storage?.get === 'function';
-
 async function loadState(){
-  if(hasStorage){
-    try{
-      const r = await window.storage.get('action-tracker');
-      if(r?.value){
-        const saved = JSON.parse(r.value);
-        if((saved.version||1) >= SEED_VERSION) return saved;
-        // stale seed version → wipe old data and re-seed with correct people & items
-        await window.storage.delete('action-tracker');
-      }
-    }catch(e){}
-  }
+  try{
+    const res = await fetch('/api/state');
+    if(!res.ok) return null;
+    const saved = await res.json();
+    if(saved && (saved.version||1) >= SEED_VERSION) return saved;
+    // no saved state, or a stale seed version → fall through to re-seed
+  }catch(e){}
   return null;
 }
 async function saveState(){
-  if(hasStorage){ try{ await window.storage.set('action-tracker', JSON.stringify(state)); return; }catch(e){} }
+  try{
+    await fetch('/api/state', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state)
+    });
+  }catch(e){}
 }
 
 function seed(){
@@ -1289,7 +1289,9 @@ function openImportModal(){
 
 /* ─── Init ───────────────────────────────────────────────────────── */
 async function init(){
-  state = (await loadState()) || seed();
+  const loaded = await loadState();
+  state = loaded || seed();
+  if(!loaded) saveState(); // first-ever load: persist the seed so every tab converges on it
   document.getElementById('themeBtn').onclick = () => {
     document.documentElement.dataset.theme = document.documentElement.dataset.theme==='dark'?'light':'dark';
   };
