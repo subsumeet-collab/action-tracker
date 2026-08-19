@@ -639,6 +639,47 @@ function followUpNote(r){
   return r.lastFollowUp ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">✉ Followed up ${fmtDate(r.lastFollowUp)}</div>` : '';
 }
 
+/* ─── Telegram follow-up ─────────────────────────────────────────── */
+function followUpTelegramText(r){
+  const dp = daysPassed(r.dateOfDisc);
+  return [
+    `Follow-up on action item:`,
+    `"${r.actionItem}"`,
+    ``,
+    `Function: ${r.function || '—'}`,
+    `Status: ${r.status}`,
+    `Raised on: ${fmtDate(r.dateOfDisc)} (${dp} day${dp===1?'':'s'} ago)`,
+    r.remarks ? `Remarks: ${r.remarks}` : null,
+    ``,
+    `Could you share a quick update on where this stands?`
+  ].filter(x => x !== null).join('\n');
+}
+
+async function sendTelegramFollowUp(id){
+  const r = state.items.find(x => x.id === id);
+  if(!r) return;
+  try{
+    const res = await fetch('/api/telegram/send-followup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ itemId: id, text: followUpTelegramText(r) })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Failed to send');
+    r.lastFollowUp = todayISO();
+    render();
+    if(data.sentTo.length && data.skipped.length){
+      toast(`Sent on Telegram to ${data.sentTo.join(', ')}. Not connected yet: ${data.skipped.join(', ')}`);
+    } else if(data.sentTo.length){
+      toast(`Sent on Telegram to ${data.sentTo.join(', ')}`);
+    } else {
+      toast('No one on this item has connected Telegram yet — get their link from Manage People');
+    }
+  }catch(e){
+    toast('Telegram send failed: ' + e.message);
+  }
+}
+
 /* ─── View mode ──────────────────────────────────────────────────── */
 let viewMode = 'list'; // 'list' | 'kanban'
 const KANBAN_STATUSES = ['Not Started','In Progress','In Progress - Delayed','Open','Done','Blocked'];
@@ -699,6 +740,7 @@ function renderTable(){
       <td class="remarks-cell">${esc(r.remarks||'—')}${followUpNote(r)}</td>
       <td><div style="display:flex;gap:4px">
         <button class="btn sm" data-followup="${r.id}" title="Send follow-up email">✉</button>
+        <button class="btn sm" data-tgfollowup="${r.id}" title="Send follow-up on Telegram">✈</button>
         <button class="btn sm" data-edit="${r.id}">Edit</button>
         <button class="btn sm" data-del="${r.id}" style="color:var(--bad)">✕</button>
       </div></td>
@@ -706,6 +748,7 @@ function renderTable(){
   }).join('');
 
   tbody.querySelectorAll('[data-followup]').forEach(b => b.onclick = () => sendFollowUp(b.dataset.followup));
+  tbody.querySelectorAll('[data-tgfollowup]').forEach(b => b.onclick = () => sendTelegramFollowUp(b.dataset.tgfollowup));
   tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openItemModal(b.dataset.edit));
   tbody.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
     if(confirm('Delete this action item?')){
@@ -740,6 +783,7 @@ function kanbanCardHTML(r){
       ${daysBadge(dp)}
       <div style="display:flex;gap:4px">
         <button class="btn sm" data-followup="${r.id}" title="Send follow-up email">✉</button>
+        <button class="btn sm" data-tgfollowup="${r.id}" title="Send follow-up on Telegram">✈</button>
         <button class="btn sm" data-edit="${r.id}">Edit</button>
         <button class="btn sm" data-del="${r.id}" style="color:var(--bad)">✕</button>
       </div>
@@ -763,6 +807,7 @@ function renderKanban(){
   }).join('');
 
   board.querySelectorAll('[data-followup]').forEach(b => b.onclick = () => sendFollowUp(b.dataset.followup));
+  board.querySelectorAll('[data-tgfollowup]').forEach(b => b.onclick = () => sendTelegramFollowUp(b.dataset.tgfollowup));
   board.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openItemModal(b.dataset.edit));
   board.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
     if(confirm('Delete this action item?')){
@@ -936,6 +981,10 @@ function renderPeoplePanel(){
             <button class="btn sm danger" data-delperson="${p.id}" style="color:var(--bad);flex-shrink:0" title="Remove person">✕</button>
           </div>
           <input class="pemail-input" type="email" data-pid="${p.id}" value="${esc(p.email||'')}" placeholder="email@example.com (for follow-ups)" style="margin-left:38px;width:calc(100% - 38px);padding:5px 8px;font-size:12.5px">
+          <div style="display:flex;align-items:center;gap:8px;margin-left:38px;font-size:12px">
+            <span style="color:${p.telegramChatId ? 'var(--ok)' : 'var(--muted)'}">✈ ${p.telegramChatId ? 'Telegram connected' : 'Telegram not connected'}</span>
+            <button class="btn sm" data-tglink="${p.id}" style="margin-left:auto">Copy connect link</button>
+          </div>
         </div>`).join('')}
     </div>
     <div id="addPersonForm" style="display:none;border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px;flex-direction:column;gap:10px">
@@ -961,6 +1010,20 @@ function renderPeoplePanel(){
     inp.onblur = () => {
       const p = state.people.find(x=>x.id===inp.dataset.pid);
       if(p){ p.email = inp.value.trim(); saveState(); }
+    };
+  });
+  // telegram connect link
+  body.querySelectorAll('[data-tglink]').forEach(b => {
+    b.onclick = async () => {
+      try{
+        const res = await fetch(`/api/telegram/link/${b.dataset.tglink}`);
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || 'Failed to get link');
+        await navigator.clipboard.writeText(data.url);
+        toast('Telegram connect link copied — send it to them');
+      }catch(e){
+        toast('Could not get link: ' + e.message);
+      }
     };
   });
   // colour picker
@@ -1295,7 +1358,11 @@ async function init(){
     document.documentElement.dataset.theme = document.documentElement.dataset.theme==='dark'?'light':'dark';
   };
   document.getElementById('addItemBtn').onclick = () => openItemModal(null);
-  document.getElementById('managePeopleBtn').onclick = () => {
+  document.getElementById('managePeopleBtn').onclick = async () => {
+    try{
+      const fresh = await fetch('/api/state').then(r=>r.json());
+      if(fresh && fresh.people) state.people = fresh.people; // pick up Telegram connections made elsewhere
+    }catch(e){}
     renderPeoplePanel();
     document.getElementById('peopleOverlay').classList.add('open');
   };
