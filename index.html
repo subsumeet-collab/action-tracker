@@ -212,7 +212,7 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
     <input type="search" id="searchBox" placeholder="Search action items…">
     <select id="fltStatus"><option value="">All statuses</option><option>In Progress</option><option>In Progress - Delayed</option><option>Not Started</option><option>Open</option><option>Done</option><option>Blocked</option></select>
     <select id="fltPerson"><option value="">All people</option></select>
-    <select id="fltFunction"><option value="">All functions</option><option>Performance Marketing</option><option>Retention Marketing</option><option>New Channels</option><option>Help from Other Departments</option></select>
+    <select id="fltFunction"><option value="">All functions</option><option>Performance Marketing</option><option>Retention Marketing</option><option>New Channels</option><option>Help from Other Departments</option><option>Donor Marketing</option></select>
     <select id="fltType"><option value="">All types</option><option>Action Pointer</option><option>Decision</option><option>Risk</option><option>FYI</option></select>
     <button class="btn sm" id="clearFlt">Clear</button>
     <span id="rowCount" style="margin-left:auto;font-size:12px;color:var(--muted)"></span>
@@ -288,7 +288,7 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
       <div class="field">
         <label>Function / Department</label>
         <select id="importFunction">
-          <option>Performance Marketing</option><option>Retention Marketing</option><option>New Channels</option><option>Help from Other Departments</option>
+          <option>Performance Marketing</option><option>Retention Marketing</option><option>New Channels</option><option>Help from Other Departments</option><option>Donor Marketing</option>
         </select>
       </div>
       <div class="field">
@@ -397,6 +397,49 @@ async function saveState(){
       body: JSON.stringify(state)
     });
   }catch(e){}
+}
+
+/* ─── Restored older action items (originally seeded pre-Q1 rewrite) ── */
+const OLD_ITEMS = [
+  {id:'o1', dateOfDisc:'2026-02-09', function:'Donor Marketing', type:'Learning/Discussion',
+   actionItem:'New acquisition increased by 70% in a specific campaign where negations are there',
+   stakeholders:['q13'], nextStep:[], status:'Open', remarks:''},
+  {id:'o2', dateOfDisc:'2026-02-09', function:'Donor Marketing', type:'Action Pointer',
+   actionItem:'Need to solve for quantum & quality for all the cases coming in',
+   stakeholders:['q7','q4'], nextStep:['q7'], status:'In Progress', remarks:''},
+  {id:'o3', dateOfDisc:'2026-02-09', function:'Donor Marketing', type:'Learning/Discussion',
+   actionItem:'PHC needs massive work on content side',
+   stakeholders:['q4'], nextStep:[], status:'Open', remarks:''},
+  {id:'o4', dateOfDisc:'2026-02-09', function:'Donor Marketing', type:'Action Pointer',
+   actionItem:'IP Based tracking for donors in not working, Need to fix this via product',
+   stakeholders:['q7'], nextStep:['q7'], status:'Open', remarks:'BRD to be raised today, Discussion to be also done'},
+  {id:'o5', dateOfDisc:'2026-02-12', function:'Donor Marketing', type:'Action Pointer',
+   actionItem:'Ramzan angles - Needs to ramp up - 10 cases list',
+   stakeholders:[], nextStep:[], status:'Open', remarks:''},
+  {id:'o6', dateOfDisc:'2026-02-12', function:'Donor Marketing', type:'Action Pointer',
+   actionItem:"Valentine's day - Are there cases? Kripa, Raeesa, Vikram to curate cases - 10 Cases list",
+   stakeholders:[], nextStep:[], status:'Open', remarks:''},
+  {id:'o7', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Action Pointer',
+   actionItem:'Ramzan angles - Needs to ramp up',
+   stakeholders:['q2','q4'], nextStep:['q2'], status:'In Progress', remarks:'there are only a few tweaks done, This lists needs to ramp up'},
+  {id:'o8', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Learning/Discussion',
+   actionItem:'ROAS dipped too much on friday evening, saturday was entirely very poor ~0.78 ROAS. This continues to be the case. Needs to be rectified',
+   stakeholders:[], nextStep:[], status:'Open', remarks:''},
+  {id:'o9', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Action Pointer',
+   actionItem:'Data - for full funnel for all donor marketing pages/cases - to be completed',
+   stakeholders:['q9'], nextStep:['q9'], status:'Done', remarks:''},
+  {id:'o10', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Action Pointer',
+   actionItem:'IP Based tracking for donors in not working, Need to fix this via product',
+   stakeholders:['q7'], nextStep:['q7'], status:'Open', remarks:'Fix has been implemented by product; Need to be tested'},
+  {id:'o11', dateOfDisc:'2026-02-20', function:'Donor Marketing', type:'Action Pointer',
+   actionItem:'PHC Creatives need to ramp up',
+   stakeholders:['q4'], nextStep:['q4'], status:'In Progress - Delayed', remarks:'Updates expected by Saturday on new deliverables'},
+];
+// Appends any OLD_ITEMS not already present, in place, without touching existing items.
+function restoreOldItems(items){
+  const have = new Set(items.map(i => i.id));
+  const missing = OLD_ITEMS.filter(i => !have.has(i.id));
+  return missing.length ? items.concat(missing) : items;
 }
 
 function seed(){
@@ -559,7 +602,7 @@ function seed(){
      actionItem:'Start emails with a Positive messaging and health update and then appeal. Since open rates are better over there',
      stakeholders:['p14','p1'], nextStep:['p3'], status:'In Progress', remarks:''},
   ];
-  return { version:SEED_VERSION, people: DEFAULT_PEOPLE, items };
+  return { version:SEED_VERSION, people: DEFAULT_PEOPLE, items: restoreOldItems(items) };
 }
 
 const uid = () => 'x' + Math.random().toString(36).slice(2,9);
@@ -917,7 +960,7 @@ function openItemModal(id){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="field"><label>Function</label>
         <select id="fFunc">
-          ${['Performance Marketing','Retention Marketing','New Channels','Help from Other Departments'].map(f=>`<option ${(existing?.function||'Performance Marketing')===f?'selected':''}>${f}</option>`).join('')}
+          ${['Performance Marketing','Retention Marketing','New Channels','Help from Other Departments','Donor Marketing'].map(f=>`<option ${(existing?.function||'Performance Marketing')===f?'selected':''}>${f}</option>`).join('')}
         </select></div>
       <div class="field"><label>Type</label>
         <select id="fType">
@@ -1353,7 +1396,12 @@ function openImportModal(){
 async function init(){
   const loaded = await loadState();
   state = loaded || seed();
-  if(!loaded) saveState(); // first-ever load: persist the seed so every tab converges on it
+  if(loaded){
+    const restored = restoreOldItems(state.items);
+    if(restored !== state.items){ state.items = restored; saveState(); } // bring back older items missing from live state
+  } else {
+    saveState(); // first-ever load: persist the seed so every tab converges on it
+  }
   document.getElementById('themeBtn').onclick = () => {
     document.documentElement.dataset.theme = document.documentElement.dataset.theme==='dark'?'light':'dark';
   };
