@@ -24,26 +24,19 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:none}
 img,svg{display:block;max-width:100%}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
-/* ===== Hero story-reel ===== */
-.hero{position:relative;width:100%;aspect-ratio:3/4;background:#000;overflow:hidden;border-radius:0 0 20px 20px}
-.hero-progress{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:5px;z-index:5}
-.hp-seg{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3);overflow:hidden}
-.hp-fill{height:100%;width:0%;background:#fff;border-radius:3px}
-.hp-seg.done .hp-fill{width:100%!important;transition:none}
-.hp-seg.active .hp-fill{transition:width linear}
+/* ===== Hero story-reel: peeking card shelf (JioHotstar-style) ===== */
+.hero-label-row{display:flex;align-items:center;justify-content:space-between;padding:16px 14px 10px}
+.hero-label{font-size:16px;font-weight:800}
+.hero-share-pill{font-size:11.5px;font-weight:700;color:var(--muted);border:1px solid var(--line);padding:5px 11px;border-radius:20px}
 
-.hero-topbar{position:absolute;top:22px;left:10px;right:10px;display:flex;align-items:center;gap:10px;z-index:5}
-.hero-topbar .spacer{flex:1}
-.circle-btn{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:grid;place-items:center;font-size:16px;color:#fff}
-.circle-btn.active{color:var(--accent)}
+.hero-shelf{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:0 14px 4px;scrollbar-width:none}
+.hero-shelf::-webkit-scrollbar{display:none}
 
-.hero-track{display:flex;height:100%;transition:transform .32s cubic-bezier(.22,.61,.36,1);touch-action:pan-y}
-.hero-track.dragging{transition:none}
-.slide{flex:0 0 100%;height:100%;position:relative;display:flex;flex-direction:column;justify-content:flex-end}
+.slide{flex:0 0 84%;aspect-ratio:3/4;position:relative;border-radius:20px;overflow:hidden;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 10px 26px rgba(0,0,0,.4)}
 .slide .art{position:absolute;inset:0;background-size:cover;background-position:center}
 .slide .art::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05) 40%,rgba(0,0,0,.85) 100%)}
 
-.swipe-hint{position:absolute;z-index:6;top:50%;right:16px;transform:translateY(-50%);display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);color:#fff;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .4s}
+.swipe-hint{position:absolute;z-index:6;top:16px;right:16px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);color:#fff;font-size:11px;font-weight:700;padding:6px 11px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .4s}
 .swipe-hint.show{opacity:1}
 .swipe-hint .arrow{display:inline-block;animation:swipe-nudge 1.1s ease-in-out infinite}
 @keyframes swipe-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
@@ -53,22 +46,22 @@ img,svg{display:block;max-width:100%}
 .s3 .art{background:radial-gradient(circle at 30% 30%,#5c2b6e,#0B0D12 70%)}
 .s4 .art{background:radial-gradient(circle at 60% 20%,#1f4a6e,#0B0D12 70%)}
 
-.slide-badge{position:relative;z-index:2;margin:60px 14px 0 14px;align-self:flex-start;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);padding:5px 10px;border-radius:20px;font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:5px}
-.slide-caption{position:relative;z-index:2;margin:0 14px;font-size:11px;color:#ffd;opacity:.8;font-weight:600;letter-spacing:.03em}
+.slide-badge{position:relative;z-index:2;margin:14px 12px 0 12px;align-self:flex-start;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);padding:5px 10px;border-radius:20px;font-size:10.5px;font-weight:700;display:flex;align-items:center;gap:5px}
+.slide-caption{position:relative;z-index:2;margin:0 12px;font-size:10px;color:#ffd;opacity:.8;font-weight:600;letter-spacing:.03em}
 
-.slide-fabs{position:absolute;right:12px;bottom:118px;z-index:4;display:flex;flex-direction:column;gap:12px}
-.fab{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:19px}
+.card-fabs{position:absolute;right:10px;bottom:80px;z-index:4;display:flex;flex-direction:column;gap:10px}
+.fab{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:16px}
 .fab.save{background:rgba(20,20,25,.65);color:#fff;border:1px solid rgba(255,255,255,.25)}
 .fab.save.saved{color:var(--accent)}
 .fab.donate{background:#fff;color:#111;box-shadow:0 4px 14px rgba(0,0,0,.4)}
 
-.slide-title{position:relative;z-index:2;padding:0 14px;font-size:26px;font-weight:800;letter-spacing:.01em}
-.slide-meta{position:relative;z-index:2;padding:6px 14px 20px;font-size:12.5px;color:#D7DAE6;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.slide-title{position:relative;z-index:2;padding:0 12px;font-size:19px;font-weight:800;letter-spacing:.01em}
+.slide-meta{position:relative;z-index:2;padding:5px 12px 14px;font-size:11px;color:#D7DAE6;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .dot{width:3px;height:3px;border-radius:50%;background:#D7DAE6}
 
-.tapzones{position:absolute;inset:0;display:flex;z-index:3}
-.tapzones .l{flex:0 0 32%}
-.tapzones .r{flex:1}
+.hero-dots{display:flex;gap:5px;justify-content:center;align-items:center;padding:12px 14px 4px}
+.hdot{width:6px;height:6px;border-radius:3px;background:var(--line);transition:width .2s,background .2s}
+.hdot.active{width:18px;background:var(--accent2)}
 
 /* ===== Trust strip ===== */
 .trust-strip{display:flex;gap:8px;overflow-x:auto;padding:12px 14px;background:var(--bg)}
@@ -78,9 +71,9 @@ img,svg{display:block;max-width:100%}
 .pill-trust.amber{border-color:var(--warn);color:var(--warn)}
 
 /* ===== Body (light, trust zone) ===== */
-.body-zone{background:var(--body-bg);color:var(--body-ink);border-radius:20px 20px 0 0;margin-top:-8px;position:relative;z-index:2;padding-bottom:96px}
+.body-zone{background:var(--body-bg);color:var(--body-ink);border-radius:20px 20px 0 0;position:relative;z-index:2;padding-bottom:96px}
 
-.progress-card{margin:-34px 14px 0;background:var(--body-card);border-radius:var(--radius);box-shadow:0 6px 24px rgba(20,25,40,.12);padding:16px;position:relative;z-index:3}
+.progress-card{margin:16px 14px 0;background:var(--body-card);border-radius:var(--radius);box-shadow:0 6px 24px rgba(20,25,40,.12);padding:16px;position:relative;z-index:3}
 .amounts{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .raised{font-size:22px;font-weight:800}
 .of-target{font-size:13px;color:var(--body-muted)}
@@ -93,14 +86,6 @@ img,svg{display:block;max-width:100%}
 .ticker span.txt{transition:opacity .25s}
 
 .inline-cta{margin-top:14px;width:100%;padding:13px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px}
-
-.social-row{display:flex;align-items:center;gap:10px;margin-top:12px}
-.avatar-stack{display:flex}
-.mini-avatar{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#fff;border:2px solid var(--body-card);margin-left:-8px}
-.mini-avatar:first-child{margin-left:0}
-.social-count{font-size:12px;color:var(--body-muted);font-weight:600}
-.save-outline{margin-left:auto;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--body-line);display:grid;place-items:center;font-size:14px}
-.save-outline.saved{border-color:var(--accent);color:var(--accent)}
 
 /* ===== Tabs ===== */
 .tabbar{display:flex;gap:6px;margin:18px 14px 0;background:var(--body-card);border:1px solid var(--body-line);border-radius:14px;padding:4px;position:sticky;top:0;z-index:10}
@@ -201,18 +186,20 @@ img,svg{display:block;max-width:100%}
 </head>
 <body>
 
-<section class="hero" id="hero" aria-roledescription="carousel" aria-label="Fundraiser story">
-  <div class="hero-progress" id="heroProgress"></div>
-
-  <div class="hero-topbar">
-    <button class="circle-btn" id="backBtn" aria-label="Back">←</button>
-    <div class="spacer"></div>
-    <button class="circle-btn" id="muteBtn" aria-label="Toggle autoplay">⏸</button>
+<section id="hero" aria-roledescription="carousel" aria-label="Fundraiser story">
+  <div class="hero-label-row">
+    <span class="hero-label">His Story</span>
+    <button class="hero-share-pill" id="heroShareBtn">↗ Share</button>
   </div>
 
-  <div class="hero-track" id="heroTrack">
+  <div class="hero-shelf" id="heroShelf">
     <div class="slide s0" data-i="0">
       <div class="art" style="background-image:url('images/slide-1-satyam-guitar.jpg'), radial-gradient(circle at 30% 20%,#3b3f8f,#0B0D12 70%)"></div>
+      <div class="swipe-hint" id="swipeHint">Swipe <span class="arrow">→</span></div>
+      <div class="card-fabs">
+        <button class="fab save" aria-label="Save fundraiser">🔖</button>
+        <button class="fab donate" aria-label="Donate now">❤️</button>
+      </div>
       <div class="slide-badge">🔴 Critical &middot; Relapsed cancer</div>
       <div class="slide-caption">1 / 5 — The Story</div>
       <div class="slide-title">Satyam, age 4</div>
@@ -220,6 +207,10 @@ img,svg{display:block;max-width:100%}
     </div>
     <div class="slide s1" data-i="1">
       <div class="art" style="background-image:url('images/slide-2-satyam-resting.jpg'), radial-gradient(circle at 70% 30%,#1f5c4f,#0B0D12 70%)"></div>
+      <div class="card-fabs">
+        <button class="fab save" aria-label="Save fundraiser">🔖</button>
+        <button class="fab donate" aria-label="Donate now">❤️</button>
+      </div>
       <div class="slide-badge">💉 Ongoing treatment</div>
       <div class="slide-caption">2 / 5 — Right Now</div>
       <div class="slide-title">Fighting, one day at a time</div>
@@ -227,6 +218,10 @@ img,svg{display:block;max-width:100%}
     </div>
     <div class="slide s2" data-i="2">
       <div class="art" style="background-image:url('images/slide-3-satyam-with-nurse.jpg'), radial-gradient(circle at 50% 20%,#8a4a2b,#0B0D12 70%)"></div>
+      <div class="card-fabs">
+        <button class="fab save" aria-label="Save fundraiser">🔖</button>
+        <button class="fab donate" aria-label="Donate now">❤️</button>
+      </div>
       <div class="slide-badge">✅ Verified fundraiser</div>
       <div class="slide-caption">3 / 5 — His Care Team</div>
       <div class="slide-title">Never alone at the hospital</div>
@@ -234,6 +229,10 @@ img,svg{display:block;max-width:100%}
     </div>
     <div class="slide s3" data-i="3">
       <div class="art" style="background-image:url('images/slide-4-satyam-mealtime.jpg'), radial-gradient(circle at 30% 30%,#5c2b6e,#0B0D12 70%)"></div>
+      <div class="card-fabs">
+        <button class="fab save" aria-label="Save fundraiser">🔖</button>
+        <button class="fab donate" aria-label="Donate now">❤️</button>
+      </div>
       <div class="slide-badge">📋 Medical proof</div>
       <div class="slide-caption">4 / 5 — Small Moments</div>
       <div class="slide-title">Mealtime, made bearable</div>
@@ -241,6 +240,10 @@ img,svg{display:block;max-width:100%}
     </div>
     <div class="slide s4" data-i="4">
       <div class="art" style="background-image:url('images/slide-5-tanya-and-satyam.jpg'), radial-gradient(circle at 60% 20%,#1f4a6e,#0B0D12 70%)"></div>
+      <div class="card-fabs">
+        <button class="fab save" aria-label="Save fundraiser">🔖</button>
+        <button class="fab donate" aria-label="Donate now">❤️</button>
+      </div>
       <div class="slide-badge">🎯 Bone marrow transplant needed</div>
       <div class="slide-caption">5 / 5 — His Sister, His Hope</div>
       <div class="slide-title">Tanya's bone marrow can save him</div>
@@ -248,17 +251,7 @@ img,svg{display:block;max-width:100%}
     </div>
   </div>
 
-  <div class="swipe-hint" id="swipeHint">Swipe for his story <span class="arrow">→</span></div>
-
-  <div class="slide-fabs">
-    <button class="fab save" id="saveFab" aria-label="Save fundraiser">🔖</button>
-    <button class="fab donate" id="donateFab" aria-label="Donate now">❤️</button>
-  </div>
-
-  <div class="tapzones">
-    <div class="l" id="tapPrev"></div>
-    <div class="r" id="tapNext"></div>
-  </div>
+  <div class="hero-dots" id="heroDots"></div>
 </section>
 
 <div class="trust-strip">
@@ -285,15 +278,6 @@ img,svg{display:block;max-width:100%}
       <span class="txt" id="tickerText">Rohit K. donated ₹1,100 · 2 min ago</span>
     </div>
     <button class="inline-cta" id="inlineCta">❤️ Donate Now</button>
-    <div class="social-row">
-      <div class="avatar-stack">
-        <span class="mini-avatar" style="background:#F97316">❤️</span>
-        <span class="mini-avatar" style="background:#0EA5E9">🤝</span>
-        <span class="mini-avatar" style="background:#8B5CF6">🙌</span>
-      </div>
-      <span class="social-count">3,214 supporters</span>
-      <button class="save-outline" id="saveOutline" aria-label="Save fundraiser">🤍</button>
-    </div>
   </div>
 
   <div class="tabbar" id="tabbar">
@@ -423,117 +407,44 @@ img,svg{display:block;max-width:100%}
 
 <script>
 (function(){
-  var track = document.getElementById('heroTrack');
-  var slides = Array.prototype.slice.call(track.children);
-  var progressWrap = document.getElementById('heroProgress');
-  var total = slides.length;
-  var idx = 0, DURATION = 4000, timer = null, segTimeout = null, playing = true;
-
-  slides.forEach(function(){
-    var seg = document.createElement('div');
-    seg.className = 'hp-seg';
-    seg.innerHTML = '<div class="hp-fill"></div>';
-    progressWrap.appendChild(seg);
-  });
-  var segs = Array.prototype.slice.call(progressWrap.children);
-
-  function render(){
-    track.style.transform = 'translateX(-' + (idx * 100) + '%)';
-    segs.forEach(function(seg, i){
-      seg.classList.toggle('done', i < idx);
-      seg.classList.toggle('active', i === idx);
-      var fill = seg.querySelector('.hp-fill');
-      if(i < idx){ fill.style.transition='none'; fill.style.width='100%'; }
-      else if(i === idx){ fill.style.transition='none'; fill.style.width='0%'; }
-      else { fill.style.transition='none'; fill.style.width='0%'; }
-    });
-  }
-
-  function runActiveFill(){
-    var fill = segs[idx].querySelector('.hp-fill');
-    requestAnimationFrame(function(){
-      fill.style.transition = 'width ' + DURATION + 'ms linear';
-      fill.style.width = '100%';
-    });
-  }
-
-  function goTo(next, autoplay){
-    idx = (next + total) % total;
-    render();
-    if(autoplay !== false) runActiveFill();
-    restartTimer();
-    dismissHint();
-  }
-
+  var shelf = document.getElementById('heroShelf');
+  var slides = Array.prototype.slice.call(shelf.querySelectorAll('.slide'));
+  var dotsWrap = document.getElementById('heroDots');
   var swipeHint = document.getElementById('swipeHint');
-  var hintShowTimer = setTimeout(function(){ swipeHint.classList.add('show'); }, 900);
-  var hintHideTimer = setTimeout(function(){ swipeHint.classList.remove('show'); }, 5000);
+
+  slides.forEach(function(_, i){
+    var d = document.createElement('div');
+    d.className = 'hdot' + (i === 0 ? ' active' : '');
+    dotsWrap.appendChild(d);
+  });
+  var dots = Array.prototype.slice.call(dotsWrap.children);
+
+  function updateActiveDot(){
+    var step = slides[0].getBoundingClientRect().width + 10;
+    var idx = Math.max(0, Math.min(slides.length - 1, Math.round(shelf.scrollLeft / step)));
+    dots.forEach(function(d, i){ d.classList.toggle('active', i === idx); });
+  }
+
+  var hintShowTimer = setTimeout(function(){ if(swipeHint) swipeHint.classList.add('show'); }, 900);
+  var hintHideTimer = setTimeout(dismissHint, 5000);
   function dismissHint(){
     clearTimeout(hintShowTimer);
     clearTimeout(hintHideTimer);
-    swipeHint.classList.remove('show');
+    if(swipeHint) swipeHint.classList.remove('show');
   }
 
-  function nextSlide(){
-    if(idx === total - 1){ goTo(0); return; }
-    goTo(idx + 1);
-  }
-  function prevSlide(){ goTo(idx - 1); }
-
-  function restartTimer(){
-    clearTimeout(timer);
-    if(!playing) return;
-    timer = setTimeout(nextSlide, DURATION);
-  }
-
-  document.getElementById('tapNext').addEventListener('click', nextSlide);
-  document.getElementById('tapPrev').addEventListener('click', prevSlide);
-
-  var muteBtn = document.getElementById('muteBtn');
-  muteBtn.addEventListener('click', function(){
-    playing = !playing;
-    muteBtn.textContent = playing ? '⏸' : '▶';
-    if(playing){ runActiveFill(); restartTimer(); }
-    else { clearTimeout(timer); segs[idx].querySelector('.hp-fill').style.transition='none'; }
-  });
-
-  var startX = 0, deltaX = 0, dragging = false;
-  track.addEventListener('touchstart', function(e){
-    dragging = true;
-    startX = e.touches[0].clientX;
-    clearTimeout(timer);
-    track.classList.add('dragging');
+  var scrollTimer = null;
+  shelf.addEventListener('scroll', function(){
+    dismissHint();
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(updateActiveDot, 80);
   }, {passive:true});
-  track.addEventListener('touchmove', function(e){
-    if(!dragging) return;
-    deltaX = e.touches[0].clientX - startX;
-    var pct = (deltaX / track.offsetWidth) * 100;
-    track.style.transform = 'translateX(calc(-' + (idx*100) + '% + ' + pct + '%))';
-  }, {passive:true});
-  track.addEventListener('touchend', function(){
-    dragging = false;
-    track.classList.remove('dragging');
-    if(Math.abs(deltaX) > 40){
-      if(deltaX < 0) nextSlide(); else prevSlide();
-    } else {
-      render();
-      restartTimer();
-    }
-    deltaX = 0;
-  });
 
-  render();
-  runActiveFill();
-  restartTimer();
-
-  document.getElementById('backBtn').addEventListener('click', function(){
-    showToast('This closes the fundraiser in a real app');
-  });
-
-  var saveFab = document.getElementById('saveFab');
-  saveFab.addEventListener('click', function(){
-    saveFab.classList.toggle('saved');
-    showToast(saveFab.classList.contains('saved') ? 'Saved to your list' : 'Removed from saved');
+  shelf.addEventListener('click', function(e){
+    var saveBtn = e.target.closest('.fab.save');
+    if(!saveBtn) return;
+    saveBtn.classList.toggle('saved');
+    showToast(saveBtn.classList.contains('saved') ? 'Saved to your list' : 'Removed from saved');
   });
 })();
 
@@ -604,8 +515,11 @@ img,svg{display:block;max-width:100%}
   function open(){ overlay.classList.add('open'); }
   function close(){ overlay.classList.remove('open'); }
 
-  ['mainDonateBtn','donateFab','inlineCta'].forEach(function(id){
+  ['mainDonateBtn','inlineCta'].forEach(function(id){
     document.getElementById(id).addEventListener('click', open);
+  });
+  document.querySelectorAll('.fab.donate').forEach(function(btn){
+    btn.addEventListener('click', open);
   });
   overlay.addEventListener('click', function(e){ if(e.target === overlay) close(); });
 
@@ -645,19 +559,13 @@ img,svg{display:block;max-width:100%}
 })();
 
 (function(){
-  var btn = document.getElementById('saveOutline');
-  btn.addEventListener('click', function(){
-    btn.classList.toggle('saved');
-    btn.textContent = btn.classList.contains('saved') ? '❤️' : '🤍';
-    showToast(btn.classList.contains('saved') ? 'Saved to your list' : 'Removed from saved');
-  });
   document.getElementById('videoCard').addEventListener('click', function(){
     showToast('This would play Satyam\'s story video');
   });
 })();
 
 (function(){
-  document.getElementById('shareBtn').addEventListener('click', function(){
+  function share(){
     var shareData = { title: 'Help Satyam Fight Cancer', text: "Satyam's sister Tanya can save him with a bone marrow transplant — every rupee counts.", url: location.href };
     if(navigator.share){
       navigator.share(shareData).catch(function(){});
@@ -666,7 +574,9 @@ img,svg{display:block;max-width:100%}
     } else {
       showToast('Share this fundraiser');
     }
-  });
+  }
+  document.getElementById('shareBtn').addEventListener('click', share);
+  document.getElementById('heroShareBtn').addEventListener('click', share);
   document.getElementById('callBtn').addEventListener('click', function(){
     showToast('This would call/WhatsApp the organizer');
   });
