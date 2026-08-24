@@ -29,10 +29,11 @@ img,svg{display:block;max-width:100%}
 .hero-label{font-size:16px;font-weight:800}
 .hero-share-pill{font-size:11.5px;font-weight:700;color:var(--muted);border:1px solid var(--line);padding:5px 11px;border-radius:20px}
 
-.hero-shelf{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:0 14px 4px;scrollbar-width:none}
-.hero-shelf::-webkit-scrollbar{display:none}
+.hero-stack{padding:0 34px 8px 14px}
+.hero-stack-inner{position:relative;aspect-ratio:3/4;touch-action:pan-y}
 
-.slide{flex:0 0 92%;aspect-ratio:3/4;position:relative;border-radius:20px;overflow:hidden;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.slide{position:absolute;inset:0;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 10px 26px rgba(0,0,0,.45);transition:transform .4s cubic-bezier(.22,.61,.36,1),opacity .4s}
+.slide.is-active .card-fabs{display:flex}
 .slide .art{position:absolute;inset:0;background-size:cover;background-position:center}
 .slide .art::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05) 40%,rgba(0,0,0,.85) 100%)}
 
@@ -49,7 +50,7 @@ img,svg{display:block;max-width:100%}
 .slide-badge{position:relative;z-index:2;margin:14px 12px 0 12px;align-self:flex-start;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);padding:5px 10px;border-radius:20px;font-size:10.5px;font-weight:700;display:flex;align-items:center;gap:5px}
 .slide-caption{position:relative;z-index:2;margin:0 12px;font-size:10px;color:#ffd;opacity:.8;font-weight:600;letter-spacing:.03em}
 
-.card-fabs{position:absolute;right:10px;bottom:80px;z-index:4;display:flex;flex-direction:column;gap:10px}
+.card-fabs{position:absolute;right:10px;bottom:80px;z-index:4;display:none;flex-direction:column;gap:10px}
 .fab{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:16px}
 .fab.save{background:rgba(20,20,25,.65);color:#fff;border:1px solid rgba(255,255,255,.25)}
 .fab.save.saved{color:var(--accent)}
@@ -192,7 +193,8 @@ img,svg{display:block;max-width:100%}
     <button class="hero-share-pill" id="heroShareBtn">↗ Share</button>
   </div>
 
-  <div class="hero-shelf" id="heroShelf">
+  <div class="hero-stack">
+  <div class="hero-stack-inner" id="heroStackInner">
     <div class="slide s0" data-i="0">
       <div class="art" style="background-image:url('images/slide-1-satyam-guitar.jpg'), radial-gradient(circle at 30% 20%,#3b3f8f,#0B0D12 70%)"></div>
       <div class="swipe-hint" id="swipeHint">Swipe <span class="arrow">→</span></div>
@@ -249,6 +251,7 @@ img,svg{display:block;max-width:100%}
       <div class="slide-title">Tanya's bone marrow can save him</div>
       <div class="slide-meta"><span>His 6-year-old sister is his donor match</span></div>
     </div>
+  </div>
   </div>
 
   <div class="hero-dots" id="heroDots"></div>
@@ -407,10 +410,12 @@ img,svg{display:block;max-width:100%}
 
 <script>
 (function(){
-  var shelf = document.getElementById('heroShelf');
-  var slides = Array.prototype.slice.call(shelf.querySelectorAll('.slide'));
+  var stackInner = document.getElementById('heroStackInner');
+  var slides = Array.prototype.slice.call(stackInner.querySelectorAll('.slide'));
   var dotsWrap = document.getElementById('heroDots');
   var swipeHint = document.getElementById('swipeHint');
+  var total = slides.length;
+  var idx = 0;
 
   slides.forEach(function(_, i){
     var d = document.createElement('div');
@@ -419,11 +424,43 @@ img,svg{display:block;max-width:100%}
   });
   var dots = Array.prototype.slice.call(dotsWrap.children);
 
-  function updateActiveDot(){
-    var step = slides[0].getBoundingClientRect().width + 8;
-    var idx = Math.max(0, Math.min(slides.length - 1, Math.round(shelf.scrollLeft / step)));
+  var OFFSETS = ['-16%', '0', '14px', '24px', '30px'];
+  function render(){
+    slides.forEach(function(card, i){
+      var rel = i - idx;
+      card.classList.toggle('is-active', rel === 0);
+      if(rel < 0){
+        card.style.transform = 'translateX(' + OFFSETS[0] + ')';
+        card.style.opacity = '0';
+        card.style.zIndex = 1;
+      } else if(rel === 0){
+        card.style.transform = 'translateX(' + OFFSETS[1] + ')';
+        card.style.opacity = '1';
+        card.style.zIndex = 5;
+      } else if(rel === 1){
+        card.style.transform = 'translateX(' + OFFSETS[2] + ')';
+        card.style.opacity = '1';
+        card.style.zIndex = 4;
+      } else if(rel === 2){
+        card.style.transform = 'translateX(' + OFFSETS[3] + ')';
+        card.style.opacity = '1';
+        card.style.zIndex = 3;
+      } else {
+        card.style.transform = 'translateX(' + OFFSETS[4] + ')';
+        card.style.opacity = '0';
+        card.style.zIndex = 2;
+      }
+    });
     dots.forEach(function(d, i){ d.classList.toggle('active', i === idx); });
   }
+
+  function goTo(n){
+    idx = Math.max(0, Math.min(total - 1, n));
+    render();
+    dismissHint();
+  }
+  function next(){ if(idx < total - 1) goTo(idx + 1); }
+  function prev(){ if(idx > 0) goTo(idx - 1); }
 
   var hintShowTimer = setTimeout(function(){ if(swipeHint) swipeHint.classList.add('show'); }, 900);
   var hintHideTimer = setTimeout(dismissHint, 5000);
@@ -433,19 +470,39 @@ img,svg{display:block;max-width:100%}
     if(swipeHint) swipeHint.classList.remove('show');
   }
 
-  var scrollTimer = null;
-  shelf.addEventListener('scroll', function(){
-    dismissHint();
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(updateActiveDot, 80);
-  }, {passive:true});
-
-  shelf.addEventListener('click', function(e){
+  stackInner.addEventListener('click', function(e){
     var saveBtn = e.target.closest('.fab.save');
-    if(!saveBtn) return;
-    saveBtn.classList.toggle('saved');
-    showToast(saveBtn.classList.contains('saved') ? 'Saved to your list' : 'Removed from saved');
+    if(saveBtn){
+      saveBtn.classList.toggle('saved');
+      showToast(saveBtn.classList.contains('saved') ? 'Saved to your list' : 'Removed from saved');
+      return;
+    }
+    if(e.target.closest('.fab')) return;
+    var card = e.target.closest('.slide');
+    if(!card) return;
+    var i = slides.indexOf(card);
+    if(i > idx) goTo(i);
+    else if(i === idx) next();
   });
+
+  var startX = 0, deltaX = 0, dragging = false;
+  stackInner.addEventListener('touchstart', function(e){
+    dragging = true;
+    startX = e.touches[0].clientX;
+    deltaX = 0;
+  }, {passive:true});
+  stackInner.addEventListener('touchmove', function(e){
+    if(!dragging) return;
+    deltaX = e.touches[0].clientX - startX;
+  }, {passive:true});
+  stackInner.addEventListener('touchend', function(){
+    dragging = false;
+    if(deltaX < -40) next();
+    else if(deltaX > 40) prev();
+    deltaX = 0;
+  });
+
+  render();
 })();
 
 (function(){
