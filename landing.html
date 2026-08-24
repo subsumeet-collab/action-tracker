@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>Help Aarav Fight Leukemia — Fundraiser</title>
+<title>Help Satyam Fight Cancer — Fundraiser</title>
 <meta name="description" content="Mobile-first fundraiser landing page prototype: swipeable story hero, sticky donate bar, tabbed proof sections.">
 <style>
 :root{
@@ -40,8 +40,13 @@ img,svg{display:block;max-width:100%}
 .hero-track{display:flex;height:100%;transition:transform .32s cubic-bezier(.22,.61,.36,1);touch-action:pan-y}
 .hero-track.dragging{transition:none}
 .slide{flex:0 0 100%;height:100%;position:relative;display:flex;flex-direction:column;justify-content:flex-end}
-.slide .art{position:absolute;inset:0;display:grid;place-items:center;font-size:64px}
+.slide .art{position:absolute;inset:0;background-size:cover;background-position:center}
 .slide .art::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05) 40%,rgba(0,0,0,.85) 100%)}
+
+.swipe-hint{position:absolute;z-index:6;top:50%;right:16px;transform:translateY(-50%);display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);color:#fff;font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .4s}
+.swipe-hint.show{opacity:1}
+.swipe-hint .arrow{display:inline-block;animation:swipe-nudge 1.1s ease-in-out infinite}
+@keyframes swipe-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
 .s0 .art{background:radial-gradient(circle at 30% 20%,#3b3f8f,#0B0D12 70%)}
 .s1 .art{background:radial-gradient(circle at 70% 30%,#1f5c4f,#0B0D12 70%)}
 .s2 .art{background:radial-gradient(circle at 50% 20%,#8a4a2b,#0B0D12 70%)}
@@ -207,41 +212,43 @@ img,svg{display:block;max-width:100%}
 
   <div class="hero-track" id="heroTrack">
     <div class="slide s0" data-i="0">
-      <div class="art">🧒</div>
-      <div class="slide-badge">🔴 Critical &middot; 7 days left</div>
+      <div class="art" style="background-image:url('images/slide-1-satyam-guitar.jpg'), radial-gradient(circle at 30% 20%,#3b3f8f,#0B0D12 70%)"></div>
+      <div class="slide-badge">🔴 Critical &middot; Relapsed cancer</div>
       <div class="slide-caption">1 / 5 — The Story</div>
-      <div class="slide-title">Aarav, age 7</div>
-      <div class="slide-meta"><span>Delhi</span><span class="dot"></span><span>Acute Leukemia</span></div>
+      <div class="slide-title">Satyam, age 4</div>
+      <div class="slide-meta"><span>Delhi</span><span class="dot"></span><span>Relapsed Blood Cancer</span></div>
     </div>
     <div class="slide s1" data-i="1">
-      <div class="art">🏥</div>
+      <div class="art" style="background-image:url('images/slide-2-satyam-resting.jpg'), radial-gradient(circle at 70% 30%,#1f5c4f,#0B0D12 70%)"></div>
       <div class="slide-badge">💉 Ongoing treatment</div>
       <div class="slide-caption">2 / 5 — Right Now</div>
-      <div class="slide-title">Mid-chemotherapy</div>
-      <div class="slide-meta"><span>Phase 2 of 4</span><span class="dot"></span><span>AIIMS Delhi</span></div>
+      <div class="slide-title">Fighting, one day at a time</div>
+      <div class="slide-meta"><span>Currently admitted</span><span class="dot"></span><span>Under close monitoring</span></div>
     </div>
     <div class="slide s2" data-i="2">
-      <div class="art">👨‍👩‍👦</div>
+      <div class="art" style="background-image:url('images/slide-3-satyam-with-nurse.jpg'), radial-gradient(circle at 50% 20%,#8a4a2b,#0B0D12 70%)"></div>
       <div class="slide-badge">✅ Verified fundraiser</div>
-      <div class="slide-caption">3 / 5 — His Family</div>
-      <div class="slide-title">His parents, by his side</div>
-      <div class="slide-meta"><span>Father: daily-wage worker</span></div>
+      <div class="slide-caption">3 / 5 — His Care Team</div>
+      <div class="slide-title">Never alone at the hospital</div>
+      <div class="slide-meta"><span>Round-the-clock nursing care</span></div>
     </div>
     <div class="slide s3" data-i="3">
-      <div class="art">🧾</div>
+      <div class="art" style="background-image:url('images/slide-4-satyam-mealtime.jpg'), radial-gradient(circle at 30% 30%,#5c2b6e,#0B0D12 70%)"></div>
       <div class="slide-badge">📋 Medical proof</div>
-      <div class="slide-caption">4 / 5 — The Diagnosis</div>
-      <div class="slide-title">Reports verified</div>
-      <div class="slide-meta"><span>Full documents in the Documents tab</span></div>
+      <div class="slide-caption">4 / 5 — Small Moments</div>
+      <div class="slide-title">Mealtime, made bearable</div>
+      <div class="slide-meta"><span>Thanks to his care team &amp; your support</span></div>
     </div>
     <div class="slide s4" data-i="4">
-      <div class="art">💛</div>
-      <div class="slide-badge">🎯 ₹8,00,000 needed</div>
-      <div class="slide-caption">5 / 5 — Your Impact</div>
-      <div class="slide-title">You can fund Phase 3</div>
-      <div class="slide-meta"><span>Every ₹500 moves the bar</span></div>
+      <div class="art" style="background-image:url('images/slide-5-tanya-and-satyam.jpg'), radial-gradient(circle at 60% 20%,#1f4a6e,#0B0D12 70%)"></div>
+      <div class="slide-badge">🎯 Bone marrow transplant needed</div>
+      <div class="slide-caption">5 / 5 — His Sister, His Hope</div>
+      <div class="slide-title">Tanya's bone marrow can save him</div>
+      <div class="slide-meta"><span>His 6-year-old sister is his donor match</span></div>
     </div>
   </div>
+
+  <div class="swipe-hint" id="swipeHint">Swipe for his story <span class="arrow">→</span></div>
 
   <div class="slide-fabs">
     <button class="fab save" id="saveFab" aria-label="Save fundraiser">🔖</button>
@@ -291,37 +298,36 @@ img,svg{display:block;max-width:100%}
 
   <div class="tabbar" id="tabbar">
     <button class="tabbtn active" data-tab="story">Story</button>
-    <button class="tabbtn" data-tab="documents">Documents<span class="tab-count">4</span></button>
+    <button class="tabbtn" data-tab="documents">Documents<span class="tab-count">2</span></button>
     <button class="tabbtn" data-tab="updates">Updates<span class="tab-count">3</span></button>
     <button class="tabbtn" data-tab="donors">Donors</button>
   </div>
 
   <div class="panel active" id="panel-story">
     <div class="video-card" id="videoCard">
-      <div class="vtop"><span class="org-ic">❤</span><span class="t">Aarav's Story, in his mother's words</span></div>
+      <div class="vtop"><span class="org-ic">❤</span><span class="t">Satyam's Story, in his mother's words</span></div>
       <div class="vplay">▶</div>
       <div class="vbottom"><span class="dur">2:14</span><span>↗ Share</span></div>
     </div>
 
     <p class="story-text clamped" id="storyText">
-      <i>Aarav was diagnosed with <b>Acute Lymphoblastic Leukemia</b> three months ago, days after his 7th
-      birthday. What started as unexplained fatigue and bruising turned into weeks in the hospital and a
-      diagnosis his parents never expected. His father drives an auto-rickshaw in Delhi; his mother stopped
-      working to stay by his side at AIIMS. The treatment plan spans <b>four phases of chemotherapy over the
-      next eight months</b>, and the family has already spent their savings and a small loan on Phase 1.
-      Phase 2 is underway, but <b>Phases 3 and 4 — nearly ₹4,50,000 — remain unfunded</b>, including a
-      possible bone marrow evaluation. Every contribution, however small, moves Aarav closer to finishing
-      treatment and going back to school with his friends. The hospital's medical team has verified the
-      diagnosis and treatment plan, and all documents are available in the Documents tab below for full
-      transparency.</i>
+      <i>Satyam is 4. His sister Tanya is 6. They should be fighting over toys, teasing each other, and
+      getting scolded by their parents for making a mess. Instead, Satyam is fighting <b>relapsed blood
+      cancer</b>. He beat it once already — but the cancer has returned, and this time chemotherapy alone
+      won't be enough. Doctors say his best chance now is a <b>bone marrow transplant</b>, and in an
+      extraordinary stroke of luck, his own sister Tanya is a match. The transplant, hospital stay and
+      post-transplant care are estimated to cost upwards of <b>₹8,00,000</b> — money this family does not
+      have. Every contribution, however small, moves Satyam closer to the transplant that could let him and
+      Tanya go back to being ordinary siblings again. All medical and identity documents have been verified
+      — see the Documents tab below.</i>
     </p>
     <button class="readmore" id="readMoreBtn">Read more</button>
 
     <div class="organizer">
-      <div class="avatar">RM</div>
+      <div class="avatar">SM</div>
       <div>
-        <div class="name">Raj Mehta</div>
-        <div class="who">Organizer &middot; Aarav's father</div>
+        <div class="name">Satyam's Mother</div>
+        <div class="who">Organizer &middot; Campaigning for her son</div>
       </div>
     </div>
 
@@ -329,7 +335,7 @@ img,svg{display:block;max-width:100%}
     <div class="hospital-card">
       <div>
         <div class="lbl">Hospital</div>
-        <div class="link">AIIMS, New Delhi</div>
+        <div class="link">Max Super Speciality Hospital, New Delhi</div>
       </div>
       <button class="share-ic" aria-label="Share hospital link">↗</button>
     </div>
@@ -337,25 +343,24 @@ img,svg{display:block;max-width:100%}
 
   <div class="panel" id="panel-documents">
     <div class="section-h">Verified documents</div>
-    <div class="doc-item"><div class="doc-ic">🩺</div><div><div class="t">Diagnosis report</div><div class="s">AIIMS Delhi &middot; Verified</div></div><div class="chev">›</div></div>
+    <div class="doc-item"><div class="doc-ic">🩺</div><div><div class="t">Diagnosis report</div><div class="s">Relapsed blood cancer &middot; Verified</div></div><div class="chev">›</div></div>
     <div class="doc-item"><div class="doc-ic">💳</div><div><div class="t">Treatment cost estimate</div><div class="s">₹8,00,000 &middot; Verified</div></div><div class="chev">›</div></div>
-    <div class="doc-item"><div class="doc-ic">🆔</div><div><div class="t">Identity &amp; address proof</div><div class="s">Organizer &middot; Verified</div></div><div class="chev">›</div></div>
-    <div class="doc-item"><div class="doc-ic">🧾</div><div><div class="t">Hospital bills so far</div><div class="s">Phase 1 &amp; 2 &middot; Verified</div></div><div class="chev">›</div></div>
+    <p style="font-size:12px;color:var(--body-muted);margin-top:2px">✅ Identity proofs for the patient and organizer have also been verified.</p>
   </div>
 
   <div class="panel" id="panel-updates">
     <div class="section-h">Latest updates</div>
     <div class="update-item">
       <div class="update-dot-col"><div class="update-dot"></div><div class="update-line"></div></div>
-      <div class="update-body"><div class="d">2 days ago</div><div class="t">Phase 2 chemotherapy started</div><div class="p">Aarav responded well to Phase 1 and has started the next round. Thank you for getting him here.</div></div>
+      <div class="update-body"><div class="d">2 days ago</div><div class="t">Tanya confirmed as donor match</div><div class="p">Test results confirmed Tanya is a suitable bone marrow match for her brother. The transplant is now being scheduled.</div></div>
     </div>
     <div class="update-item">
       <div class="update-dot-col"><div class="update-dot"></div><div class="update-line"></div></div>
-      <div class="update-body"><div class="d">3 weeks ago</div><div class="t">Halfway to the Phase 1 goal</div><div class="p">Crossed ₹4,00,000 thanks to over 2,000 supporters. Phase 1 is now fully funded.</div></div>
+      <div class="update-body"><div class="d">3 weeks ago</div><div class="t">Cancer confirmed to have relapsed</div><div class="p">Follow-up tests confirmed Satyam's blood cancer has returned, and doctors recommended a bone marrow transplant.</div></div>
     </div>
     <div class="update-item">
       <div class="update-dot-col"><div class="update-dot"></div></div>
-      <div class="update-body"><div class="d">2 months ago</div><div class="t">Fundraiser started</div><div class="p">Raj shared Aarav's story and diagnosis documents to begin raising funds for treatment.</div></div>
+      <div class="update-body"><div class="d">2 months ago</div><div class="t">Fundraiser started</div><div class="p">Satyam's mother shared his story and diagnosis documents to begin raising funds for the transplant.</div></div>
     </div>
   </div>
 
@@ -374,7 +379,7 @@ img,svg{display:block;max-width:100%}
       <div class="faq-a"><p>Yes, donations are eligible for tax exemption under Section 80G. A receipt is emailed automatically after payment.</p></div>
     </div>
     <div class="faq-item">
-      <button class="faq-q">How do I know the funds reach Aarav? <span class="ic">+</span></button>
+      <button class="faq-q">How do I know the funds reach Satyam? <span class="ic">+</span></button>
       <div class="faq-a"><p>Funds are disbursed directly to the verified hospital against submitted bills, not to the organizer's personal account.</p></div>
     </div>
     <div class="faq-item">
@@ -457,6 +462,16 @@ img,svg{display:block;max-width:100%}
     render();
     if(autoplay !== false) runActiveFill();
     restartTimer();
+    dismissHint();
+  }
+
+  var swipeHint = document.getElementById('swipeHint');
+  var hintShowTimer = setTimeout(function(){ swipeHint.classList.add('show'); }, 900);
+  var hintHideTimer = setTimeout(function(){ swipeHint.classList.remove('show'); }, 5000);
+  function dismissHint(){
+    clearTimeout(hintShowTimer);
+    clearTimeout(hintHideTimer);
+    swipeHint.classList.remove('show');
   }
 
   function nextSlide(){
@@ -567,7 +582,7 @@ img,svg{display:block;max-width:100%}
     'Rohit K. donated ₹1,100 · 2 min ago',
     'Anonymous donated ₹500 · 6 min ago',
     'Priya S. donated ₹2,500 · 14 min ago',
-    '3,214 people have supported Aarav so far',
+    '3,214 people have supported Satyam so far',
     'Vikram P. donated ₹5,000 · 31 min ago'
   ];
   var i = 0;
@@ -637,13 +652,13 @@ img,svg{display:block;max-width:100%}
     showToast(btn.classList.contains('saved') ? 'Saved to your list' : 'Removed from saved');
   });
   document.getElementById('videoCard').addEventListener('click', function(){
-    showToast('This would play Aarav\'s story video');
+    showToast('This would play Satyam\'s story video');
   });
 })();
 
 (function(){
   document.getElementById('shareBtn').addEventListener('click', function(){
-    var shareData = { title: 'Help Aarav Fight Leukemia', text: 'Aarav needs help funding his cancer treatment — every rupee counts.', url: location.href };
+    var shareData = { title: 'Help Satyam Fight Cancer', text: "Satyam's sister Tanya can save him with a bone marrow transplant — every rupee counts.", url: location.href };
     if(navigator.share){
       navigator.share(shareData).catch(function(){});
     } else if(navigator.clipboard){
