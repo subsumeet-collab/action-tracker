@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Help Aarav Fight Leukemia — Fundraiser</title>
+<meta name="description" content="Mobile-first fundraiser landing page prototype: swipeable story hero, sticky donate bar, tabbed proof sections.">
+<style>
+:root{
+  --bg:#0B0D12;--card:#12151D;--card2:#1A1E29;--ink:#F5F6FA;--muted:#A6ACC0;
+  --line:#252B3A;--accent:#FF4D6D;--accent2:#7C3AED;--ok:#22C55E;--ok-bg:#0E2818;
+  --warn:#FBBF24;--body-bg:#F4F5F8;--body-ink:#141824;--body-muted:#6B7280;
+  --body-line:#E4E7EF;--body-card:#FFFFFF;--radius:16px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--ink)}
+body{font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;max-width:480px;margin:0 auto;position:relative;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:none}
+img,svg{display:block;max-width:100%}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ===== Hero story-reel ===== */
+.hero{position:relative;width:100%;aspect-ratio:3/4;background:#000;overflow:hidden;border-radius:0 0 20px 20px}
+.hero-progress{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:5px;z-index:5}
+.hp-seg{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3);overflow:hidden}
+.hp-fill{height:100%;width:0%;background:#fff;border-radius:3px}
+.hp-seg.done .hp-fill{width:100%!important;transition:none}
+.hp-seg.active .hp-fill{transition:width linear}
+
+.hero-topbar{position:absolute;top:22px;left:10px;right:10px;display:flex;align-items:center;gap:10px;z-index:5}
+.hero-topbar .spacer{flex:1}
+.circle-btn{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:grid;place-items:center;font-size:16px;color:#fff}
+.circle-btn.active{color:var(--accent)}
+
+.hero-track{display:flex;height:100%;transition:transform .32s cubic-bezier(.22,.61,.36,1);touch-action:pan-y}
+.hero-track.dragging{transition:none}
+.slide{flex:0 0 100%;height:100%;position:relative;display:flex;flex-direction:column;justify-content:flex-end}
+.slide .art{position:absolute;inset:0;display:grid;place-items:center;font-size:64px}
+.slide .art::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05) 40%,rgba(0,0,0,.85) 100%)}
+.s0 .art{background:radial-gradient(circle at 30% 20%,#3b3f8f,#0B0D12 70%)}
+.s1 .art{background:radial-gradient(circle at 70% 30%,#1f5c4f,#0B0D12 70%)}
+.s2 .art{background:radial-gradient(circle at 50% 20%,#8a4a2b,#0B0D12 70%)}
+.s3 .art{background:radial-gradient(circle at 30% 30%,#5c2b6e,#0B0D12 70%)}
+.s4 .art{background:radial-gradient(circle at 60% 20%,#1f4a6e,#0B0D12 70%)}
+
+.slide-badge{position:relative;z-index:2;margin:60px 14px 0 14px;align-self:flex-start;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);padding:5px 10px;border-radius:20px;font-size:11.5px;font-weight:700;display:flex;align-items:center;gap:5px}
+.slide-caption{position:relative;z-index:2;margin:0 14px;font-size:11px;color:#ffd;opacity:.8;font-weight:600;letter-spacing:.03em}
+
+.slide-fabs{position:absolute;right:12px;bottom:118px;z-index:4;display:flex;flex-direction:column;gap:12px}
+.fab{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:19px}
+.fab.save{background:rgba(20,20,25,.65);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.fab.save.saved{color:var(--accent)}
+.fab.donate{background:#fff;color:#111;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+
+.slide-title{position:relative;z-index:2;padding:0 14px;font-size:26px;font-weight:800;letter-spacing:.01em}
+.slide-meta{position:relative;z-index:2;padding:6px 14px 20px;font-size:12.5px;color:#D7DAE6;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.dot{width:3px;height:3px;border-radius:50%;background:#D7DAE6}
+
+.tapzones{position:absolute;inset:0;display:flex;z-index:3}
+.tapzones .l{flex:0 0 32%}
+.tapzones .r{flex:1}
+
+/* ===== Trust strip ===== */
+.trust-strip{display:flex;gap:8px;overflow-x:auto;padding:12px 14px;background:var(--bg)}
+.trust-strip::-webkit-scrollbar{display:none}
+.pill-trust{flex:0 0 auto;background:var(--card2);border:1px solid var(--line);color:var(--muted);font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:20px;white-space:nowrap}
+
+/* ===== Body (light, trust zone) ===== */
+.body-zone{background:var(--body-bg);color:var(--body-ink);border-radius:20px 20px 0 0;margin-top:-8px;position:relative;z-index:2;padding-bottom:96px}
+
+.progress-card{margin:-34px 14px 0;background:var(--body-card);border-radius:var(--radius);box-shadow:0 6px 24px rgba(20,25,40,.12);padding:16px;position:relative;z-index:3}
+.amounts{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.raised{font-size:22px;font-weight:800}
+.of-target{font-size:13px;color:var(--body-muted)}
+.pbar-track{margin-top:10px;height:8px;border-radius:8px;background:#EEF0F5;overflow:hidden}
+.pbar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:8px}
+.stats-row{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--body-muted)}
+.stats-row b{color:var(--body-ink);font-size:13px}
+.ticker{margin-top:12px;padding-top:10px;border-top:1px dashed var(--body-line);font-size:12px;color:var(--body-muted);display:flex;align-items:center;gap:6px;min-height:16px}
+.ticker .live-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:0 0 auto;box-shadow:0 0 0 3px var(--ok-bg)}
+.ticker span.txt{transition:opacity .25s}
+
+.inline-cta{margin-top:14px;width:100%;padding:13px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+.social-row{display:flex;align-items:center;gap:10px;margin-top:12px}
+.avatar-stack{display:flex}
+.mini-avatar{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#fff;border:2px solid var(--body-card);margin-left:-8px}
+.mini-avatar:first-child{margin-left:0}
+.social-count{font-size:12px;color:var(--body-muted);font-weight:600}
+.save-outline{margin-left:auto;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--body-line);display:grid;place-items:center;font-size:14px}
+.save-outline.saved{border-color:var(--accent);color:var(--accent)}
+
+/* ===== Tabs ===== */
+.tabbar{display:flex;gap:6px;margin:18px 14px 0;background:var(--body-card);border:1px solid var(--body-line);border-radius:14px;padding:4px;position:sticky;top:0;z-index:10}
+.tabbtn{flex:1;text-align:center;padding:9px 4px;border-radius:10px;font-size:12.5px;font-weight:700;color:var(--body-muted);display:flex;align-items:center;justify-content:center;gap:4px}
+.tabbtn.active{background:var(--body-ink);color:#fff}
+.tab-count{font-size:10px;background:var(--body-line);color:var(--body-muted);border-radius:8px;padding:1px 5px;font-weight:800}
+.tabbtn.active .tab-count{background:rgba(255,255,255,.25);color:#fff}
+
+.video-card{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:16/10;background:radial-gradient(circle at 30% 20%,#3b3f8f,#12151D 70%);margin-bottom:16px;display:flex;flex-direction:column;justify-content:space-between}
+.video-card .vtop{display:flex;align-items:center;gap:8px;padding:10px 12px;color:#fff}
+.video-card .vtop .org-ic{width:22px;height:22px;border-radius:6px;background:#fff;color:#111;display:grid;place-items:center;font-size:12px;font-weight:800}
+.video-card .vtop .t{font-size:12px;font-weight:700}
+.video-card .vplay{align-self:center;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.92);color:#111;display:grid;place-items:center;font-size:20px;margin:auto}
+.video-card .vbottom{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;color:#fff;font-size:11px}
+.video-card .vbottom .dur{background:rgba(0,0,0,.5);padding:3px 7px;border-radius:6px;font-weight:700}
+
+.hospital-card{display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px;background:var(--body-card);border:1px solid var(--body-line);border-radius:12px}
+.hospital-card .lbl{font-size:11px;color:var(--body-muted);font-weight:600}
+.hospital-card .link{font-size:13.5px;font-weight:700;color:var(--accent2);text-decoration:underline}
+.hospital-card .share-ic{margin-left:auto;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--body-line);display:grid;place-items:center;font-size:14px;color:var(--body-ink)}
+
+.panel{padding:16px 14px 4px;display:none}
+.panel.active{display:block}
+.section-h{font-size:15px;font-weight:800;margin-bottom:8px}
+
+.story-text{font-size:13.8px;line-height:1.65;color:#333}
+.story-text.clamped{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.readmore{margin-top:8px;font-weight:700;font-size:13px;color:var(--accent2)}
+
+.organizer{display:flex;gap:10px;align-items:center;margin-top:16px;padding:12px;background:var(--body-card);border:1px solid var(--body-line);border-radius:12px}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px;flex:0 0 auto}
+.organizer .who{font-size:12px;color:var(--body-muted)}
+.organizer .name{font-weight:700;font-size:13.5px}
+
+.doc-item{display:flex;gap:10px;align-items:center;padding:12px;background:var(--body-card);border:1px solid var(--body-line);border-radius:12px;margin-bottom:10px}
+.doc-ic{width:38px;height:38px;border-radius:10px;background:var(--ok-bg);color:var(--ok);display:grid;place-items:center;font-size:18px;flex:0 0 auto}
+.doc-item .t{font-weight:700;font-size:13.5px}
+.doc-item .s{font-size:11.5px;color:var(--body-muted)}
+.doc-item .chev{margin-left:auto;color:var(--body-muted)}
+
+.update-item{display:flex;gap:10px;margin-bottom:16px}
+.update-dot-col{display:flex;flex-direction:column;align-items:center}
+.update-dot{width:9px;height:9px;border-radius:50%;background:var(--accent2);margin-top:4px}
+.update-line{width:2px;flex:1;background:var(--body-line);margin-top:4px}
+.update-item:last-child .update-line{display:none}
+.update-body .d{font-size:11px;color:var(--body-muted);font-weight:700}
+.update-body .t{font-size:13.5px;font-weight:700;margin:2px 0}
+.update-body .p{font-size:12.8px;color:#444;line-height:1.5}
+
+.donor-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--body-line)}
+.donor-row:last-child{border-bottom:none}
+.donor-l{display:flex;gap:9px;align-items:center}
+.donor-name{font-size:13.5px;font-weight:700}
+.donor-time{font-size:11px;color:var(--body-muted)}
+.donor-amt{font-weight:800;font-size:13.5px;color:var(--ok)}
+
+.faq{margin:20px 14px 0}
+.faq-item{border-bottom:1px solid var(--body-line)}
+.faq-q{width:100%;display:flex;justify-content:space-between;align-items:center;padding:13px 2px;font-weight:700;font-size:13.5px;text-align:left}
+.faq-q .ic{transition:transform .2s;color:var(--body-muted)}
+.faq-item.open .faq-q .ic{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .25s ease}
+.faq-a p{font-size:12.8px;color:#444;line-height:1.55;padding:0 2px 13px}
+
+.footer-zone{margin:26px 14px 0;padding:16px 0 4px;border-top:1px solid var(--body-line);font-size:11px;color:var(--body-muted);line-height:1.7}
+.footer-badges{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.footer-badges span{background:#EEF0F5;padding:5px 9px;border-radius:8px;font-weight:700;font-size:10.5px;color:#555}
+
+/* ===== Sticky bottom action bar ===== */
+.bottom-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;background:rgba(11,13,18,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:10px 12px calc(10px + var(--safe-b));z-index:40}
+.bb-icon{width:44px;height:44px;border-radius:12px;background:var(--card2);border:1px solid var(--line);color:#fff;display:grid;place-items:center;font-size:18px;flex:0 0 auto}
+.bb-donate{flex:1;padding:13px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-weight:800;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* ===== Donation bottom sheet ===== */
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.sheet-overlay.open{opacity:1;pointer-events:auto}
+.sheet{width:100%;max-width:480px;margin:0 auto;background:var(--body-card);border-radius:20px 20px 0 0;padding:18px 16px calc(18px + var(--safe-b));transform:translateY(100%);transition:transform .28s cubic-bezier(.22,.61,.36,1);color:var(--body-ink)}
+.sheet-overlay.open .sheet{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;border-radius:4px;background:var(--body-line);margin:0 auto 14px}
+.sheet-title{font-size:16px;font-weight:800;margin-bottom:12px}
+.amount-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.amount-chip{padding:14px 4px;border-radius:12px;border:1.5px solid var(--body-line);text-align:center;font-weight:800;font-size:14.5px}
+.amount-chip .sub{display:block;font-size:10.5px;font-weight:600;color:var(--body-muted);margin-top:2px}
+.amount-chip.selected{border-color:var(--accent2);background:#F4EEFF;color:var(--accent2)}
+.custom-amt{width:100%;padding:13px;border:1.5px solid var(--body-line);border-radius:12px;font-size:14.5px;font-weight:700;margin-bottom:14px}
+.custom-amt:focus{outline:none;border-color:var(--accent2)}
+.pay-btn{width:100%;padding:14px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;font-weight:800;font-size:15px}
+.anon-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12.5px;color:var(--body-muted)}
+
+/* ===== Toast ===== */
+.toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:#111;color:#fff;padding:10px 16px;border-radius:30px;font-size:13px;font-weight:600;z-index:80;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (min-width:481px){
+  body{border-left:1px solid #1c1f27;border-right:1px solid #1c1f27}
+}
+</style>
+</head>
+<body>
+
+<section class="hero" id="hero" aria-roledescription="carousel" aria-label="Fundraiser story">
+  <div class="hero-progress" id="heroProgress"></div>
+
+  <div class="hero-topbar">
+    <button class="circle-btn" id="backBtn" aria-label="Back">←</button>
+    <div class="spacer"></div>
+    <button class="circle-btn" id="muteBtn" aria-label="Toggle autoplay">⏸</button>
+  </div>
+
+  <div class="hero-track" id="heroTrack">
+    <div class="slide s0" data-i="0">
+      <div class="art">🧒</div>
+      <div class="slide-badge">🔴 Critical &middot; 7 days left</div>
+      <div class="slide-caption">1 / 5 — The Story</div>
+      <div class="slide-title">Aarav, age 7</div>
+      <div class="slide-meta"><span>Delhi</span><span class="dot"></span><span>Acute Leukemia</span></div>
+    </div>
+    <div class="slide s1" data-i="1">
+      <div class="art">🏥</div>
+      <div class="slide-badge">💉 Ongoing treatment</div>
+      <div class="slide-caption">2 / 5 — Right Now</div>
+      <div class="slide-title">Mid-chemotherapy</div>
+      <div class="slide-meta"><span>Phase 2 of 4</span><span class="dot"></span><span>AIIMS Delhi</span></div>
+    </div>
+    <div class="slide s2" data-i="2">
+      <div class="art">👨‍👩‍👦</div>
+      <div class="slide-badge">✅ Verified fundraiser</div>
+      <div class="slide-caption">3 / 5 — His Family</div>
+      <div class="slide-title">His parents, by his side</div>
+      <div class="slide-meta"><span>Father: daily-wage worker</span></div>
+    </div>
+    <div class="slide s3" data-i="3">
+      <div class="art">🧾</div>
+      <div class="slide-badge">📋 Medical proof</div>
+      <div class="slide-caption">4 / 5 — The Diagnosis</div>
+      <div class="slide-title">Reports verified</div>
+      <div class="slide-meta"><span>Full documents in the Documents tab</span></div>
+    </div>
+    <div class="slide s4" data-i="4">
+      <div class="art">💛</div>
+      <div class="slide-badge">🎯 ₹8,00,000 needed</div>
+      <div class="slide-caption">5 / 5 — Your Impact</div>
+      <div class="slide-title">You can fund Phase 3</div>
+      <div class="slide-meta"><span>Every ₹500 moves the bar</span></div>
+    </div>
+  </div>
+
+  <div class="slide-fabs">
+    <button class="fab save" id="saveFab" aria-label="Save fundraiser">🔖</button>
+    <button class="fab donate" id="donateFab" aria-label="Donate now">❤️</button>
+  </div>
+
+  <div class="tapzones">
+    <div class="l" id="tapPrev"></div>
+    <div class="r" id="tapNext"></div>
+  </div>
+</section>
+
+<div class="trust-strip">
+  <span class="pill-trust">✅ Verified NGO Partner</span>
+  <span class="pill-trust">🧾 80G Tax Benefit</span>
+  <span class="pill-trust">🔒 100% Secure Payments</span>
+  <span class="pill-trust">⚡ Instant Fund Disbursal</span>
+</div>
+
+<div class="body-zone">
+
+  <div class="progress-card">
+    <div class="amounts">
+      <span class="raised">₹5,42,300</span>
+      <span class="of-target">raised of ₹8,00,000 goal</span>
+    </div>
+    <div class="pbar-track"><div class="pbar-fill" style="width:68%"></div></div>
+    <div class="stats-row">
+      <div><b>3,214</b> supporters</div>
+      <div><b>7</b> days left</div>
+      <div><b>68%</b> funded</div>
+    </div>
+    <div class="ticker">
+      <span class="live-dot"></span>
+      <span class="txt" id="tickerText">Rohit K. donated ₹1,100 · 2 min ago</span>
+    </div>
+    <button class="inline-cta" id="inlineCta">❤️ Donate Now</button>
+    <div class="social-row">
+      <div class="avatar-stack">
+        <span class="mini-avatar" style="background:#F97316">❤️</span>
+        <span class="mini-avatar" style="background:#0EA5E9">🤝</span>
+        <span class="mini-avatar" style="background:#8B5CF6">🙌</span>
+      </div>
+      <span class="social-count">3,214 supporters</span>
+      <button class="save-outline" id="saveOutline" aria-label="Save fundraiser">🤍</button>
+    </div>
+  </div>
+
+  <div class="tabbar" id="tabbar">
+    <button class="tabbtn active" data-tab="story">Story</button>
+    <button class="tabbtn" data-tab="documents">Documents<span class="tab-count">4</span></button>
+    <button class="tabbtn" data-tab="updates">Updates<span class="tab-count">3</span></button>
+    <button class="tabbtn" data-tab="donors">Donors</button>
+  </div>
+
+  <div class="panel active" id="panel-story">
+    <div class="video-card" id="videoCard">
+      <div class="vtop"><span class="org-ic">❤</span><span class="t">Aarav's Story, in his mother's words</span></div>
+      <div class="vplay">▶</div>
+      <div class="vbottom"><span class="dur">2:14</span><span>↗ Share</span></div>
+    </div>
+
+    <p class="story-text clamped" id="storyText">
+      <i>Aarav was diagnosed with <b>Acute Lymphoblastic Leukemia</b> three months ago, days after his 7th
+      birthday. What started as unexplained fatigue and bruising turned into weeks in the hospital and a
+      diagnosis his parents never expected. His father drives an auto-rickshaw in Delhi; his mother stopped
+      working to stay by his side at AIIMS. The treatment plan spans <b>four phases of chemotherapy over the
+      next eight months</b>, and the family has already spent their savings and a small loan on Phase 1.
+      Phase 2 is underway, but <b>Phases 3 and 4 — nearly ₹4,50,000 — remain unfunded</b>, including a
+      possible bone marrow evaluation. Every contribution, however small, moves Aarav closer to finishing
+      treatment and going back to school with his friends. The hospital's medical team has verified the
+      diagnosis and treatment plan, and all documents are available in the Documents tab below for full
+      transparency.</i>
+    </p>
+    <button class="readmore" id="readMoreBtn">Read more</button>
+
+    <div class="organizer">
+      <div class="avatar">RM</div>
+      <div>
+        <div class="name">Raj Mehta</div>
+        <div class="who">Organizer &middot; Aarav's father</div>
+      </div>
+    </div>
+
+    <div class="section-h" style="margin-top:16px">Contact</div>
+    <div class="hospital-card">
+      <div>
+        <div class="lbl">Hospital</div>
+        <div class="link">AIIMS, New Delhi</div>
+      </div>
+      <button class="share-ic" aria-label="Share hospital link">↗</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-documents">
+    <div class="section-h">Verified documents</div>
+    <div class="doc-item"><div class="doc-ic">🩺</div><div><div class="t">Diagnosis report</div><div class="s">AIIMS Delhi &middot; Verified</div></div><div class="chev">›</div></div>
+    <div class="doc-item"><div class="doc-ic">💳</div><div><div class="t">Treatment cost estimate</div><div class="s">₹8,00,000 &middot; Verified</div></div><div class="chev">›</div></div>
+    <div class="doc-item"><div class="doc-ic">🆔</div><div><div class="t">Identity &amp; address proof</div><div class="s">Organizer &middot; Verified</div></div><div class="chev">›</div></div>
+    <div class="doc-item"><div class="doc-ic">🧾</div><div><div class="t">Hospital bills so far</div><div class="s">Phase 1 &amp; 2 &middot; Verified</div></div><div class="chev">›</div></div>
+  </div>
+
+  <div class="panel" id="panel-updates">
+    <div class="section-h">Latest updates</div>
+    <div class="update-item">
+      <div class="update-dot-col"><div class="update-dot"></div><div class="update-line"></div></div>
+      <div class="update-body"><div class="d">2 days ago</div><div class="t">Phase 2 chemotherapy started</div><div class="p">Aarav responded well to Phase 1 and has started the next round. Thank you for getting him here.</div></div>
+    </div>
+    <div class="update-item">
+      <div class="update-dot-col"><div class="update-dot"></div><div class="update-line"></div></div>
+      <div class="update-body"><div class="d">3 weeks ago</div><div class="t">Halfway to the Phase 1 goal</div><div class="p">Crossed ₹4,00,000 thanks to over 2,000 supporters. Phase 1 is now fully funded.</div></div>
+    </div>
+    <div class="update-item">
+      <div class="update-dot-col"><div class="update-dot"></div></div>
+      <div class="update-body"><div class="d">2 months ago</div><div class="t">Fundraiser started</div><div class="p">Raj shared Aarav's story and diagnosis documents to begin raising funds for treatment.</div></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-donors">
+    <div class="section-h">Recent supporters</div>
+    <div class="donor-row"><div class="donor-l"><div class="avatar" style="width:30px;height:30px;font-size:11px">SK</div><div><div class="donor-name">Sana K.</div><div class="donor-time">4 min ago</div></div></div><div class="donor-amt">₹2,100</div></div>
+    <div class="donor-row"><div class="donor-l"><div class="avatar" style="width:30px;height:30px;font-size:11px">A</div><div><div class="donor-name">Anonymous</div><div class="donor-time">12 min ago</div></div></div><div class="donor-amt">₹500</div></div>
+    <div class="donor-row"><div class="donor-l"><div class="avatar" style="width:30px;height:30px;font-size:11px">VP</div><div><div class="donor-name">Vikram P.</div><div class="donor-time">31 min ago</div></div></div><div class="donor-amt">₹5,000</div></div>
+    <div class="donor-row"><div class="donor-l"><div class="avatar" style="width:30px;height:30px;font-size:11px">NT</div><div><div class="donor-name">Neha T.</div><div class="donor-time">1 hr ago</div></div></div><div class="donor-amt">₹1,000</div></div>
+  </div>
+
+  <div class="faq">
+    <div class="section-h">Frequently asked</div>
+    <div class="faq-item">
+      <button class="faq-q">Is my donation tax-deductible? <span class="ic">+</span></button>
+      <div class="faq-a"><p>Yes, donations are eligible for tax exemption under Section 80G. A receipt is emailed automatically after payment.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">How do I know the funds reach Aarav? <span class="ic">+</span></button>
+      <div class="faq-a"><p>Funds are disbursed directly to the verified hospital against submitted bills, not to the organizer's personal account.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Is this fundraiser verified? <span class="ic">+</span></button>
+      <div class="faq-a"><p>Yes — medical documents, identity proof and hospital estimates have all been verified. See the Documents tab.</p></div>
+    </div>
+  </div>
+
+  <div class="footer-zone">
+    <div class="footer-badges"><span>🔒 SSL Secured</span><span>🧾 80G Certified</span><span>✅ NGO Verified</span></div>
+    <p>This is a prototype landing page for internal review. Patient details, images and figures shown are placeholder sample data — replace with verified case data before use in production.</p>
+  </div>
+
+</div>
+
+<div class="bottom-bar">
+  <button class="bb-icon" id="shareBtn" aria-label="Share">↗</button>
+  <button class="bb-donate" id="mainDonateBtn">❤️ <span id="mainDonateLabel">Donate ₹1,000</span></button>
+  <button class="bb-icon" id="callBtn" aria-label="Call organizer">📞</button>
+</div>
+
+<div class="sheet-overlay" id="sheetOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Choose an amount</div>
+    <div class="amount-grid" id="amountGrid">
+      <button class="amount-chip" data-amt="500">₹500<span class="sub">Basic care</span></button>
+      <button class="amount-chip selected" data-amt="1000">₹1,000<span class="sub">Most chosen</span></button>
+      <button class="amount-chip" data-amt="2500">₹2,500<span class="sub">One day's meds</span></button>
+      <button class="amount-chip" data-amt="5000">₹5,000<span class="sub">Big impact</span></button>
+      <button class="amount-chip" data-amt="10000">₹10,000<span class="sub">Major support</span></button>
+      <button class="amount-chip" data-amt="0" id="customChip">Custom</button>
+    </div>
+    <input class="custom-amt" id="customInput" type="number" inputmode="numeric" placeholder="Enter custom amount (₹)" style="display:none">
+    <label class="anon-row"><input type="checkbox" id="anonCheck"> Donate anonymously</label>
+    <button class="pay-btn" id="payBtn">Proceed to Pay ₹1,000</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var track = document.getElementById('heroTrack');
+  var slides = Array.prototype.slice.call(track.children);
+  var progressWrap = document.getElementById('heroProgress');
+  var total = slides.length;
+  var idx = 0, DURATION = 4000, timer = null, segTimeout = null, playing = true;
+
+  slides.forEach(function(){
+    var seg = document.createElement('div');
+    seg.className = 'hp-seg';
+    seg.innerHTML = '<div class="hp-fill"></div>';
+    progressWrap.appendChild(seg);
+  });
+  var segs = Array.prototype.slice.call(progressWrap.children);
+
+  function render(){
+    track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+    segs.forEach(function(seg, i){
+      seg.classList.toggle('done', i < idx);
+      seg.classList.toggle('active', i === idx);
+      var fill = seg.querySelector('.hp-fill');
+      if(i < idx){ fill.style.transition='none'; fill.style.width='100%'; }
+      else if(i === idx){ fill.style.transition='none'; fill.style.width='0%'; }
+      else { fill.style.transition='none'; fill.style.width='0%'; }
+    });
+  }
+
+  function runActiveFill(){
+    var fill = segs[idx].querySelector('.hp-fill');
+    requestAnimationFrame(function(){
+      fill.style.transition = 'width ' + DURATION + 'ms linear';
+      fill.style.width = '100%';
+    });
+  }
+
+  function goTo(next, autoplay){
+    idx = (next + total) % total;
+    render();
+    if(autoplay !== false) runActiveFill();
+    restartTimer();
+  }
+
+  function nextSlide(){
+    if(idx === total - 1){ goTo(0); return; }
+    goTo(idx + 1);
+  }
+  function prevSlide(){ goTo(idx - 1); }
+
+  function restartTimer(){
+    clearTimeout(timer);
+    if(!playing) return;
+    timer = setTimeout(nextSlide, DURATION);
+  }
+
+  document.getElementById('tapNext').addEventListener('click', nextSlide);
+  document.getElementById('tapPrev').addEventListener('click', prevSlide);
+
+  var muteBtn = document.getElementById('muteBtn');
+  muteBtn.addEventListener('click', function(){
+    playing = !playing;
+    muteBtn.textContent = playing ? '⏸' : '▶';
+    if(playing){ runActiveFill(); restartTimer(); }
+    else { clearTimeout(timer); segs[idx].querySelector('.hp-fill').style.transition='none'; }
+  });
+
+  var startX = 0, deltaX = 0, dragging = false;
+  track.addEventListener('touchstart', function(e){
+    dragging = true;
+    startX = e.touches[0].clientX;
+    clearTimeout(timer);
+    track.classList.add('dragging');
+  }, {passive:true});
+  track.addEventListener('touchmove', function(e){
+    if(!dragging) return;
+    deltaX = e.touches[0].clientX - startX;
+    var pct = (deltaX / track.offsetWidth) * 100;
+    track.style.transform = 'translateX(calc(-' + (idx*100) + '% + ' + pct + '%))';
+  }, {passive:true});
+  track.addEventListener('touchend', function(){
+    dragging = false;
+    track.classList.remove('dragging');
+    if(Math.abs(deltaX) > 40){
+      if(deltaX < 0) nextSlide(); else prevSlide();
+    } else {
+      render();
+      restartTimer();
+    }
+    deltaX = 0;
+  });
+
+  render();
+  runActiveFill();
+  restartTimer();
+
+  document.getElementById('backBtn').addEventListener('click', function(){
+    showToast('This closes the fundraiser in a real app');
+  });
+
+  var saveFab = document.getElementById('saveFab');
+  saveFab.addEventListener('click', function(){
+    saveFab.classList.toggle('saved');
+    showToast(saveFab.classList.contains('saved') ? 'Saved to your list' : 'Removed from saved');
+  });
+})();
+
+(function(){
+  var tabbar = document.getElementById('tabbar');
+  tabbar.addEventListener('click', function(e){
+    var btn = e.target.closest('.tabbtn');
+    if(!btn) return;
+    Array.prototype.forEach.call(tabbar.children, function(b){ b.classList.toggle('active', b === btn); });
+    document.querySelectorAll('.panel').forEach(function(p){
+      p.classList.toggle('active', p.id === 'panel-' + btn.dataset.tab);
+    });
+    tabbar.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+})();
+
+(function(){
+  var storyText = document.getElementById('storyText');
+  var btn = document.getElementById('readMoreBtn');
+  btn.addEventListener('click', function(){
+    storyText.classList.toggle('clamped');
+    btn.textContent = storyText.classList.contains('clamped') ? 'Read more' : 'Read less';
+  });
+})();
+
+(function(){
+  document.querySelectorAll('.faq-item').forEach(function(item){
+    var q = item.querySelector('.faq-q');
+    var a = item.querySelector('.faq-a');
+    q.addEventListener('click', function(){
+      var opening = !item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(function(o){
+        o.classList.remove('open');
+        o.querySelector('.faq-a').style.maxHeight = null;
+      });
+      if(opening){
+        item.classList.add('open');
+        a.style.maxHeight = a.scrollHeight + 'px';
+      }
+    });
+  });
+})();
+
+(function(){
+  var updates = [
+    'Rohit K. donated ₹1,100 · 2 min ago',
+    'Anonymous donated ₹500 · 6 min ago',
+    'Priya S. donated ₹2,500 · 14 min ago',
+    '3,214 people have supported Aarav so far',
+    'Vikram P. donated ₹5,000 · 31 min ago'
+  ];
+  var i = 0;
+  var el = document.getElementById('tickerText');
+  setInterval(function(){
+    i = (i + 1) % updates.length;
+    el.style.opacity = 0;
+    setTimeout(function(){ el.textContent = updates[i]; el.style.opacity = 1; }, 250);
+  }, 3500);
+})();
+
+(function(){
+  var overlay = document.getElementById('sheetOverlay');
+  var grid = document.getElementById('amountGrid');
+  var customInput = document.getElementById('customInput');
+  var payBtn = document.getElementById('payBtn');
+  var selected = 1000;
+
+  function open(){ overlay.classList.add('open'); }
+  function close(){ overlay.classList.remove('open'); }
+
+  ['mainDonateBtn','donateFab','inlineCta'].forEach(function(id){
+    document.getElementById(id).addEventListener('click', open);
+  });
+  overlay.addEventListener('click', function(e){ if(e.target === overlay) close(); });
+
+  grid.addEventListener('click', function(e){
+    var chip = e.target.closest('.amount-chip');
+    if(!chip) return;
+    Array.prototype.forEach.call(grid.children, function(c){ c.classList.remove('selected'); });
+    chip.classList.add('selected');
+    if(chip.id === 'customChip'){
+      customInput.style.display = 'block';
+      customInput.focus();
+      selected = parseInt(customInput.value, 10) || 0;
+    } else {
+      customInput.style.display = 'none';
+      selected = parseInt(chip.dataset.amt, 10);
+    }
+    updatePayLabel();
+  });
+
+  customInput.addEventListener('input', function(){
+    selected = parseInt(customInput.value, 10) || 0;
+    updatePayLabel();
+  });
+
+  function updatePayLabel(){
+    payBtn.textContent = 'Proceed to Pay ₹' + (selected || 0).toLocaleString('en-IN');
+    if(selected){
+      document.getElementById('mainDonateLabel').textContent = 'Donate ₹' + selected.toLocaleString('en-IN');
+    }
+  }
+
+  payBtn.addEventListener('click', function(){
+    if(!selected){ showToast('Enter an amount to continue'); return; }
+    close();
+    showToast('This would open the secure payment flow');
+  });
+})();
+
+(function(){
+  var btn = document.getElementById('saveOutline');
+  btn.addEventListener('click', function(){
+    btn.classList.toggle('saved');
+    btn.textContent = btn.classList.contains('saved') ? '❤️' : '🤍';
+    showToast(btn.classList.contains('saved') ? 'Saved to your list' : 'Removed from saved');
+  });
+  document.getElementById('videoCard').addEventListener('click', function(){
+    showToast('This would play Aarav\'s story video');
+  });
+})();
+
+(function(){
+  document.getElementById('shareBtn').addEventListener('click', function(){
+    var shareData = { title: 'Help Aarav Fight Leukemia', text: 'Aarav needs help funding his cancer treatment — every rupee counts.', url: location.href };
+    if(navigator.share){
+      navigator.share(shareData).catch(function(){});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(shareData.url).then(function(){ showToast('Link copied to clipboard'); });
+    } else {
+      showToast('Share this fundraiser');
+    }
+  });
+  document.getElementById('callBtn').addEventListener('click', function(){
+    showToast('This would call/WhatsApp the organizer');
+  });
+})();
+
+var toastTimer = null;
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+</script>
+</body>
+</html>
