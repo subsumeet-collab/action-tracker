@@ -65,10 +65,10 @@ img,svg{display:block;max-width:100%}
 .hdot.active{width:18px;background:var(--accent2)}
 
 /* ===== Trust strip ===== */
-.trust-strip{display:flex;gap:6px;padding:12px 14px;background:var(--bg)}
-.pill-trust{flex:1 1 0;min-width:0;justify-content:center;background:rgba(255,255,255,.05);border:1.5px solid var(--line);color:var(--muted);font-size:9.8px;font-weight:700;padding:5px 4px;border-radius:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-flex;align-items:center;gap:3px}
-.pill-trust.green{border-color:var(--accent2);color:var(--accent2-light)}
-.pill-trust.amber{border-color:var(--warn);color:var(--warn)}
+.trust-strip{display:flex;gap:6px;padding:16px 14px 0}
+.pill-trust{flex:1 1 0;min-width:0;justify-content:center;background:var(--body-card);border:1.5px solid var(--body-line);color:var(--body-muted);font-size:9.8px;font-weight:700;padding:5px 4px;border-radius:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-flex;align-items:center;gap:3px}
+.pill-trust.green{border-color:var(--accent2);color:var(--accent2-dark)}
+.pill-trust.amber{border-color:var(--warn);color:#B4740F}
 
 /* ===== Body (light, trust zone) ===== */
 .body-zone{background:var(--body-bg);color:var(--body-ink);border-radius:20px 20px 0 0;position:relative;z-index:2;padding-bottom:96px}
@@ -262,13 +262,13 @@ img,svg{display:block;max-width:100%}
   <div class="hero-dots" id="heroDots"></div>
 </section>
 
-<div class="trust-strip">
-  <span class="pill-trust green">✅ Verified</span>
-  <span class="pill-trust amber">🛡️ Donor Protection</span>
-  <span class="pill-trust green">🧾 Tax Benefits</span>
-</div>
-
 <div class="body-zone">
+
+  <div class="trust-strip">
+    <span class="pill-trust green">✅ Verified</span>
+    <span class="pill-trust amber">🛡️ Donor Protection</span>
+    <span class="pill-trust green">🧾 Tax Benefits</span>
+  </div>
 
   <div class="progress-card">
     <div class="amounts">
