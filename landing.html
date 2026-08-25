@@ -66,9 +66,14 @@ img,svg{display:block;max-width:100%}
 
 /* ===== Trust strip ===== */
 .trust-strip{display:flex;gap:6px;padding:16px 14px 0}
-.pill-trust{flex:1 1 0;min-width:0;justify-content:center;background:var(--body-card);border:1.5px solid var(--body-line);color:var(--body-muted);font-size:9.8px;font-weight:700;padding:5px 4px;border-radius:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-flex;align-items:center;gap:3px}
-.pill-trust.green{border-color:var(--accent2);color:var(--accent2-dark)}
-.pill-trust.amber{border-color:var(--warn);color:#B4740F}
+.pill-trust{flex:1 1 0;min-width:0;min-height:44px;background:var(--body-card);border:1.5px solid var(--body-line);border-radius:14px;padding:5px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-align:center}
+.pill-trust:active{transform:scale(.97)}
+.pill-trust .pt-row{display:inline-flex;align-items:center;gap:3px;font-size:9.8px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:var(--body-muted)}
+.pill-trust .pt-sub{font-size:8px;font-weight:600;color:var(--body-muted);opacity:.75;white-space:nowrap}
+.pill-trust.green{border-color:var(--accent2)}
+.pill-trust.green .pt-row{color:var(--accent2-dark)}
+.pill-trust.amber{border-color:var(--warn)}
+.pill-trust.amber .pt-row{color:#B4740F}
 
 /* ===== Body (light, trust zone) ===== */
 .body-zone{background:var(--body-bg);color:var(--body-ink);border-radius:20px 20px 0 0;position:relative;z-index:2;padding-bottom:96px}
@@ -181,6 +186,10 @@ img,svg{display:block;max-width:100%}
 .pay-btn{width:100%;padding:14px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:#fff;font-weight:800;font-size:15px}
 .anon-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12.5px;color:var(--body-muted)}
 
+.info-icon{font-size:26px;margin-bottom:10px}
+.info-body{font-size:13.5px;line-height:1.6;color:#333;margin-bottom:16px}
+.info-close{width:100%;padding:13px;border-radius:12px;background:var(--body-bg);border:1px solid var(--body-line);color:var(--body-ink);font-weight:700;font-size:14px}
+
 /* ===== Toast ===== */
 .toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:#111;color:#fff;padding:10px 16px;border-radius:30px;font-size:13px;font-weight:600;z-index:80;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -265,9 +274,16 @@ img,svg{display:block;max-width:100%}
 <div class="body-zone">
 
   <div class="trust-strip">
-    <span class="pill-trust green">✅ Verified</span>
-    <span class="pill-trust amber">🛡️ Donor Protection</span>
-    <span class="pill-trust green">🧾 Tax Benefits</span>
+    <button type="button" class="pill-trust green" id="verifiedBadge">
+      <span class="pt-row">✅ Verified</span>
+      <span class="pt-sub">Click to view docs</span>
+    </button>
+    <button type="button" class="pill-trust amber" id="protectionBadge">
+      <span class="pt-row">🛡️ Donor Protection</span>
+    </button>
+    <button type="button" class="pill-trust green" id="taxBadge">
+      <span class="pt-row">🧾 Tax Benefits</span>
+    </button>
   </div>
 
   <div class="progress-card">
@@ -421,6 +437,16 @@ img,svg{display:block;max-width:100%}
   </div>
 </div>
 
+<div class="sheet-overlay" id="infoSheetOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="info-icon" id="infoIcon">🛡️</div>
+    <div class="sheet-title" id="infoTitle">Donor Protection</div>
+    <p class="info-body" id="infoBody"></p>
+    <button class="info-close" id="infoCloseBtn">Got it</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -520,17 +546,52 @@ img,svg{display:block;max-width:100%}
   render();
 })();
 
+function switchTab(name){
+  var tabbar = document.getElementById('tabbar');
+  var btn = tabbar.querySelector('.tabbtn[data-tab="' + name + '"]');
+  if(!btn) return;
+  Array.prototype.forEach.call(tabbar.children, function(b){ b.classList.toggle('active', b === btn); });
+  document.querySelectorAll('.panel').forEach(function(p){
+    p.classList.toggle('active', p.id === 'panel-' + name);
+  });
+  tabbar.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
 (function(){
   var tabbar = document.getElementById('tabbar');
   tabbar.addEventListener('click', function(e){
     var btn = e.target.closest('.tabbtn');
     if(!btn) return;
-    Array.prototype.forEach.call(tabbar.children, function(b){ b.classList.toggle('active', b === btn); });
-    document.querySelectorAll('.panel').forEach(function(p){
-      p.classList.toggle('active', p.id === 'panel-' + btn.dataset.tab);
-    });
-    tabbar.scrollIntoView({behavior:'smooth', block:'start'});
+    switchTab(btn.dataset.tab);
   });
+})();
+
+(function(){
+  document.getElementById('verifiedBadge').addEventListener('click', function(){
+    switchTab('documents');
+  });
+
+  var overlay = document.getElementById('infoSheetOverlay');
+  var icon = document.getElementById('infoIcon');
+  var title = document.getElementById('infoTitle');
+  var body = document.getElementById('infoBody');
+
+  function openInfo(ic, t, b){
+    icon.textContent = ic;
+    title.textContent = t;
+    body.textContent = b;
+    overlay.classList.add('open');
+  }
+  function closeInfo(){ overlay.classList.remove('open'); }
+
+  document.getElementById('protectionBadge').addEventListener('click', function(){
+    openInfo('🛡️', 'Donor Protection', 'Medical estimates, and both the beneficiary’s and campaigner’s KYC, have been independently verified for this fundraiser — so you know exactly who your donation is going to and why.');
+  });
+  document.getElementById('taxBadge').addEventListener('click', function(){
+    openInfo('🧾', 'Tax Benefits', 'Donations here are eligible for tax exemption under Section 80G of the Income Tax Act. Your 80G certificate is generated automatically and emailed to you immediately after your donation — no separate request needed.');
+  });
+  document.getElementById('infoCloseBtn').addEventListener('click', closeInfo);
+  overlay.addEventListener('click', function(e){ if(e.target === overlay) closeInfo(); });
 })();
 
 (function(){
