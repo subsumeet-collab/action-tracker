@@ -7,8 +7,8 @@
 <meta name="description" content="Mobile-first fundraiser landing page prototype: swipeable story hero, sticky donate bar, tabbed proof sections.">
 <style>
 :root{
-  --bg:#FFF8E7;--card:#FFFFFF;--card2:#FFF1CE;--ink:#2B2415;--muted:#8C7A52;
-  --line:#E3D2A6;
+  --bg:#EFF8F3;--card:#FFFFFF;--card2:#E3F3E9;--ink:#14213D;--muted:#6B7280;
+  --line:#E4E7EF;
   /* ImpactGuru brand palette: orange CTA, green trust/verified, navy headings, amber protection badge */
   --accent:#FF7A1A;--accent-dark:#E8600A;
   --accent2:#0EA46F;--accent2-dark:#078355;--accent2-light:#4ADE94;
@@ -31,8 +31,8 @@ img,svg{display:block;max-width:100%}
 .ig-logo-mark{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:6px;background:var(--accent2);color:#fff;font-size:14px;font-weight:900;line-height:1;flex:0 0 auto}
 .hero-share-pill{font-size:11.5px;font-weight:700;color:var(--muted);border:1px solid var(--line);padding:5px 11px;border-radius:20px}
 
-.hero-stack{padding:0 34px 8px 14px}
-.hero-stack-inner{position:relative;aspect-ratio:3/4;touch-action:pan-y}
+.hero-stack{padding:0 24px 8px 12px}
+.hero-stack-inner{position:relative;aspect-ratio:3/4.3;touch-action:pan-y}
 
 .slide{position:absolute;inset:0;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 10px 26px rgba(0,0,0,.45);transition:transform .4s cubic-bezier(.22,.61,.36,1),opacity .4s}
 .slide.is-active .card-fabs{display:flex}
@@ -168,7 +168,7 @@ img,svg{display:block;max-width:100%}
 .footer-badges span{background:#EEF0F5;padding:5px 9px;border-radius:8px;font-weight:700;font-size:10.5px;color:#555}
 
 /* ===== Sticky bottom action bar ===== */
-.bottom-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;background:rgba(255,248,231,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:10px 12px calc(10px + var(--safe-b));z-index:40}
+.bottom-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;background:rgba(239,248,243,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:10px 12px calc(10px + var(--safe-b));z-index:40}
 .bb-icon{width:44px;height:44px;border-radius:12px;background:var(--card2);border:1px solid var(--line);color:var(--ink);display:grid;place-items:center;font-size:18px;flex:0 0 auto}
 .bb-donate{flex:1;padding:13px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:#fff;font-weight:800;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:6px}
 
@@ -476,15 +476,15 @@ img,svg{display:block;max-width:100%}
         card.style.opacity = '1';
         card.style.zIndex = 5;
       } else if(rel === 1){
-        card.style.transform = 'translateX(14px)';
+        card.style.transform = 'translateX(9px)';
         card.style.opacity = '1';
         card.style.zIndex = 4;
       } else if(rel === 2){
-        card.style.transform = 'translateX(24px)';
+        card.style.transform = 'translateX(16px)';
         card.style.opacity = '1';
         card.style.zIndex = 3;
       } else {
-        card.style.transform = 'translateX(30px)';
+        card.style.transform = 'translateX(20px)';
         card.style.opacity = '0';
         card.style.zIndex = 2;
       }
