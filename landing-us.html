@@ -149,13 +149,6 @@ img,svg{display:block;max-width:100%}
 .update-body .t{font-size:13.5px;font-weight:700;margin:2px 0}
 .update-body .p{font-size:12.8px;color:#444;line-height:1.5}
 
-.donor-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--body-line)}
-.donor-row:last-child{border-bottom:none}
-.donor-l{display:flex;gap:9px;align-items:center}
-.donor-name{font-size:13.5px;font-weight:700}
-.donor-time{font-size:11px;color:var(--body-muted)}
-.donor-amt{font-weight:800;font-size:13.5px;color:var(--ok)}
-
 .faq{margin:20px 14px 0}
 .faq-item{border-bottom:1px solid var(--body-line)}
 .faq-q{width:100%;display:flex;justify-content:space-between;align-items:center;padding:13px 2px;font-weight:700;font-size:13.5px;text-align:left}
@@ -185,8 +178,17 @@ img,svg{display:block;max-width:100%}
 .amount-chip{padding:14px 4px;border-radius:12px;border:1.5px solid var(--body-line);text-align:center;font-weight:800;font-size:14.5px}
 .amount-chip .sub{display:block;font-size:10.5px;font-weight:600;color:var(--body-muted);margin-top:2px}
 .amount-chip.selected{border-color:var(--accent2);background:#E6F7F0;color:var(--accent2-dark)}
-.freq-btn{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--body-line);font-weight:700;font-size:12.5px;background:#fff;color:var(--body-muted)}
+.freq-btn{flex:1;padding:10px;border-radius:20px;border:1.5px solid var(--body-line);font-weight:700;font-size:12.5px;background:#fff;color:var(--body-muted)}
 .freq-btn.active{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.impact-card{display:flex;gap:9px;align-items:flex-start;background:#F3F4F8;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#333;line-height:1.5}
+.impact-card .ic{font-size:15px;flex:0 0 auto}
+.dedicate-row{margin-bottom:12px}
+.dedicate-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 2px;font-size:12.5px;font-weight:700;color:var(--body-ink);border-bottom:1px solid var(--body-line)}
+.dedicate-toggle .chev{color:var(--body-muted);transition:transform .2s}
+.dedicate-toggle.open .chev{transform:rotate(180deg)}
+.dedicate-input{display:none;width:100%;padding:11px;border:1.5px solid var(--body-line);border-radius:10px;font-size:13px;margin-top:8px}
+.dedicate-input:focus{outline:none;border-color:var(--accent2)}
+.adsrc-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12.5px;color:var(--body-muted)}
 .custom-amt{width:100%;padding:13px;border:1.5px solid var(--body-line);border-radius:12px;font-size:14.5px;font-weight:700;margin-bottom:14px}
 .custom-amt:focus{outline:none;border-color:var(--accent2)}
 .pay-btn{width:100%;padding:14px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:#fff;font-weight:800;font-size:15px}
@@ -325,7 +327,6 @@ img,svg{display:block;max-width:100%}
     <button class="tabbtn active" data-tab="story">Story</button>
     <button class="tabbtn" data-tab="documents">Documents<span class="tab-count">2</span></button>
     <button class="tabbtn" data-tab="updates">Updates<span class="tab-count">3</span></button>
-    <button class="tabbtn" data-tab="donors">Donors</button>
   </div>
 
   <div class="panel active" id="panel-story">
@@ -389,19 +390,11 @@ img,svg{display:block;max-width:100%}
     </div>
   </div>
 
-  <div class="panel" id="panel-donors">
-    <div class="section-h">Recent supporters</div>
-    <div class="donor-row"><div class="donor-l"><div class="avatar" style="width:30px;height:30px;font-size:11px">ER</div><div><div class="donor-name">Emily R.</div><div class="donor-time">4 min ago</div></div></div><div class="donor-amt">$220</div></div>
-    <div class="donor-row"><div class="donor-l"><div class="avatar" style="width:30px;height:30px;font-size:11px">A</div><div><div class="donor-name">Anonymous</div><div class="donor-time">12 min ago</div></div></div><div class="donor-amt">$50</div></div>
-    <div class="donor-row"><div class="donor-l"><div class="avatar" style="width:30px;height:30px;font-size:11px">MT</div><div><div class="donor-name">Michael T.</div><div class="donor-time">31 min ago</div></div></div><div class="donor-amt">$500</div></div>
-    <div class="donor-row"><div class="donor-l"><div class="avatar" style="width:30px;height:30px;font-size:11px">SK</div><div><div class="donor-name">Sarah K.</div><div class="donor-time">1 hr ago</div></div></div><div class="donor-amt">$100</div></div>
-  </div>
-
   <div class="faq">
     <div class="section-h">Frequently asked</div>
     <div class="faq-item">
       <button class="faq-q">Is my donation tax-deductible? <span class="ic">+</span></button>
-      <div class="faq-a"><p>Yes, where eligible under US tax law. A donation receipt suitable for tax purposes is emailed automatically after payment.</p></div>
+      <div class="faq-a"><p>Yes — ImpactGuru's US partner is a 501(c)(3) tax-exempt organization, and your donation is tax deductible within the guidelines of U.S. law. Keep your receipt as your official record; we'll email it automatically upon successful completion of your donation.</p></div>
     </div>
     <div class="faq-item">
       <button class="faq-q">How do I know the funds reach Satyam? <span class="ic">+</span></button>
@@ -434,6 +427,7 @@ img,svg{display:block;max-width:100%}
       <button class="freq-btn active" data-freq="once">One-time</button>
       <button class="freq-btn" data-freq="monthly">Monthly</button>
     </div>
+    <div class="impact-card" id="impactCard"><span class="ic">💊</span><span><b>$50</b> could cover a full day of Satyam's chemotherapy medication.</span></div>
     <div class="amount-grid" id="amountGrid">
       <button class="amount-chip" data-amt="25">$25<span class="sub">Basic care</span></button>
       <button class="amount-chip selected" data-amt="50">$50<span class="sub">Most chosen</span></button>
@@ -443,8 +437,14 @@ img,svg{display:block;max-width:100%}
       <button class="amount-chip" data-amt="0" id="customChip">Custom</button>
     </div>
     <input class="custom-amt" id="customInput" type="number" inputmode="numeric" placeholder="Enter custom amount ($)" style="display:none">
+    <div class="dedicate-row">
+      <button type="button" class="dedicate-toggle" id="dedicateToggle">Dedicate my donation <span class="chev">⌄</span></button>
+      <input class="dedicate-input" id="dedicateInput" type="text" placeholder="In honor / memory of…">
+    </div>
     <label class="anon-row"><input type="checkbox" id="anonCheck"> Donate anonymously</label>
+    <label class="adsrc-row"><input type="checkbox" id="adSrcCheck"> I came here from a video ad</label>
     <button class="pay-btn" id="payBtn">Proceed to Pay $50</button>
+    <p style="font-size:10.5px;color:var(--body-muted);line-height:1.5;margin-top:10px">ImpactGuru's US partner is a 501(c)(3) tax-exempt organization, and your donation is tax deductible within the guidelines of U.S. law. Your receipt will be emailed upon successful completion.</p>
   </div>
 </div>
 
@@ -594,7 +594,7 @@ function switchTab(name){
     openInfo('🛡️', 'Donor Protection', 'Medical estimates, and both the beneficiary’s and campaigner’s KYC, have been independently verified for this fundraiser — so you know exactly who your donation is going to and why.');
   });
   document.getElementById('taxBadge').addEventListener('click', function(){
-    openInfo('🧾', 'Tax-deductible', 'Where eligible under US tax law, your donation qualifies for a tax-deductible receipt. This is emailed automatically immediately after your donation — no separate request needed.');
+    openInfo('🧾', 'Tax-deductible', 'ImpactGuru\'s US partner is a 501(c)(3) tax-exempt organization, and your donation is tax deductible within the guidelines of U.S. law. Keep your receipt as your official record — we\'ll email it to you automatically upon successful completion of your donation.');
   });
   document.getElementById('infoCloseBtn').addEventListener('click', closeInfo);
   overlay.addEventListener('click', function(e){ if(e.target === overlay) closeInfo(); });
@@ -695,18 +695,42 @@ function switchTab(name){
       updatePayLabel();
     });
   }
+  var IMPACT = {
+    25: '💊 <b>$25</b> could provide a day of basic supportive care.',
+    50: '💊 <b>$50</b> could cover a full day of Satyam\'s chemotherapy medication.',
+    100: '🏥 <b>$100</b> could cover one day of round-the-clock nursing care.',
+    250: '🩺 <b>$250</b> could make a big dent in his next chemotherapy session.',
+    500: '🔬 <b>$500</b> could cover major diagnostic testing ahead of the transplant.'
+  };
+  var impactCard = document.getElementById('impactCard');
+  function updateImpact(){
+    var msg = IMPACT[selected] || (selected ? '❤️ <b>$' + selected.toLocaleString('en-US') + '</b> makes a real difference for Satyam\'s treatment.' : '❤️ Every contribution moves Satyam closer to his transplant.');
+    var parts = msg.split(' ');
+    impactCard.innerHTML = '<span class="ic">' + parts[0] + '</span><span>' + parts.slice(1).join(' ') + '</span>';
+  }
+
   function updatePayLabel(){
     var suffix = freq === 'monthly' ? '/mo' : '';
     payBtn.textContent = 'Proceed to Pay $' + (selected || 0).toLocaleString('en-US') + suffix;
     if(selected){
       document.getElementById('mainDonateLabel').textContent = 'Donate $' + selected.toLocaleString('en-US') + suffix;
     }
+    updateImpact();
   }
 
   payBtn.addEventListener('click', function(){
     if(!selected){ showToast('Enter an amount to continue'); return; }
     close();
     showToast('This would open the secure payment flow');
+  });
+
+  var dedicateToggle = document.getElementById('dedicateToggle');
+  var dedicateInput = document.getElementById('dedicateInput');
+  dedicateToggle.addEventListener('click', function(){
+    var opening = dedicateInput.style.display !== 'block';
+    dedicateInput.style.display = opening ? 'block' : 'none';
+    dedicateToggle.classList.toggle('open', opening);
+    if(opening) dedicateInput.focus();
   });
 })();
 
