@@ -43,11 +43,11 @@ img,svg{display:block;max-width:100%}
 .swipe-hint.show{opacity:1}
 .swipe-hint .arrow{display:inline-block;animation:swipe-nudge 1.1s ease-in-out infinite}
 @keyframes swipe-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
-.s0 .art{background:radial-gradient(circle at 30% 20%,#3b3f8f,#0B0D12 70%)}
-.s1 .art{background:radial-gradient(circle at 70% 30%,#1f5c4f,#0B0D12 70%)}
-.s2 .art{background:radial-gradient(circle at 50% 20%,#8a4a2b,#0B0D12 70%)}
-.s3 .art{background:radial-gradient(circle at 30% 30%,#5c2b6e,#0B0D12 70%)}
-.s4 .art{background:radial-gradient(circle at 60% 20%,#1f4a6e,#0B0D12 70%)}
+.s0 .art{background-image:radial-gradient(circle at 30% 20%,#3b3f8f,#0B0D12 70%)}
+.s1 .art{background-image:radial-gradient(circle at 70% 30%,#1f5c4f,#0B0D12 70%)}
+.s2 .art{background-image:radial-gradient(circle at 50% 20%,#8a4a2b,#0B0D12 70%)}
+.s3 .art{background-image:radial-gradient(circle at 30% 30%,#5c2b6e,#0B0D12 70%)}
+.s4 .art{background-image:radial-gradient(circle at 60% 20%,#1f4a6e,#0B0D12 70%)}
 
 .slide-badge{position:relative;z-index:2;margin:14px 12px 0 12px;align-self:flex-start;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);padding:5px 10px;border-radius:20px;font-size:10.5px;font-weight:700;display:flex;align-items:center;gap:5px;color:#fff}
 .slide-caption{position:relative;z-index:2;margin:0 12px;font-size:10px;color:#ffd;opacity:.8;font-weight:600;letter-spacing:.03em}
@@ -213,7 +213,7 @@ img,svg{display:block;max-width:100%}
   <div class="hero-stack">
   <div class="hero-stack-inner" id="heroStackInner">
     <div class="slide s0" data-i="0">
-      <div class="art" style="background-image:url('images/slide-1-satyam-guitar.png'), radial-gradient(circle at 30% 20%,#3b3f8f,#0B0D12 70%);background-size:145%;background-position:56% 8%"></div>
+      <div class="art" style="background-image:url('images/slide-1-satyam-guitar.png'), radial-gradient(circle at 30% 20%,#3b3f8f,#0B0D12 70%)"></div>
       <div class="swipe-hint" id="swipeHint">Swipe <span class="arrow">→</span></div>
       <div class="card-fabs">
         <button class="fab save" aria-label="Save fundraiser">🔖</button>
