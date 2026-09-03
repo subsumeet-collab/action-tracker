@@ -30,6 +30,16 @@ img,svg{display:block;max-width:100%}
 .ig-logo{display:inline-flex;align-items:center;gap:6px;font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
 .ig-logo-mark{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:6px;background:var(--accent2);color:#fff;font-size:14px;font-weight:900;line-height:1;flex:0 0 auto}
 .hero-share-pill{font-size:11.5px;font-weight:700;color:var(--muted);border:1px solid var(--line);padding:5px 11px;border-radius:20px}
+.demo-toggle{font-size:10.5px;font-weight:700;color:var(--muted);border:1px dashed var(--line);padding:4px 9px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.demo-toggle .dot{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.demo-toggle.on{color:var(--accent2-dark);border-color:var(--accent2);border-style:solid;background:#E6F7F0}
+.demo-toggle.on .dot{background:var(--accent2)}
+.gateway-overlay{position:fixed;inset:0;z-index:90;background:rgba(20,33,61,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;opacity:0;pointer-events:none;transition:opacity .2s}
+.gateway-overlay.show{opacity:1;pointer-events:auto}
+.gateway-spinner{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;animation:gw-spin .8s linear infinite}
+@keyframes gw-spin{to{transform:rotate(360deg)}}
+.gateway-overlay .gw-txt{font-size:13.5px;font-weight:600;text-align:center;max-width:80%}
+.gateway-overlay .gw-sub{font-size:11.5px;color:#B9C2D6;text-align:center;max-width:80%}
 
 .hero-stack{padding:0 24px 4px 12px}
 .hero-stack-inner{position:relative;aspect-ratio:3/4.6;touch-action:pan-y}
@@ -212,7 +222,8 @@ img,svg{display:block;max-width:100%}
 <section id="hero" aria-roledescription="carousel" aria-label="Fundraiser story">
   <div class="hero-label-row">
     <span class="ig-logo"><span class="ig-logo-mark">+</span>ImpactGuru</span>
-    <div style="display:flex;gap:6px"><button class="hero-share-pill" id="currencyBtn">USD ▾</button><button class="hero-share-pill" id="heroShareBtn">↗ Share</button></div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button type="button" class="demo-toggle" id="returningToggle" title="Demo only — simulates a recognized donor with saved payment details"><span class="dot"></span>New visitor</button><button class="hero-share-pill" id="currencyBtn">USD ▾</button><button class="hero-share-pill" id="heroShareBtn">↗ Share</button></div>
   </div>
 
   <!-- BACKEND: hero slides support two media types, not just static photos.
@@ -458,6 +469,21 @@ img,svg{display:block;max-width:100%}
   </div>
 </div>
 
+<!-- BACKEND: when a donor is recognized (logged in, or arriving via a link/token
+     tied to a saved payment method) and we already hold everything the
+     payment step needs, the amount-selection sheet should be skippable —
+     send them straight to the payment gateway with their last-used or
+     default amount pre-filled, one tap to confirm. Needs a "known donor"
+     signal from auth/CRM, a saved default amount + payment method per
+     donor, and a gateway deep-link that accepts a pre-set amount. The
+     toggle below simulates this for demo purposes only — it is not a
+     production control. -->
+<div class="gateway-overlay" id="gatewayOverlay">
+  <div class="gateway-spinner"></div>
+  <div class="gw-txt" id="gwTxt">Redirecting to secure payment gateway…</div>
+  <div class="gw-sub" id="gwSub"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -651,14 +677,43 @@ function switchTab(name){
   var payBtn = document.getElementById('payBtn');
   var selected = 50;
 
+  var toggle = document.getElementById('returningToggle');
+  var isReturning = false;
+  var savedAmount = 50;
+  var gwOverlay = document.getElementById('gatewayOverlay');
+  var gwTxt = document.getElementById('gwTxt');
+  var gwSub = document.getElementById('gwSub');
+
+  toggle.addEventListener('click', function(){
+    isReturning = !isReturning;
+    toggle.classList.toggle('on', isReturning);
+    toggle.innerHTML = '<span class="dot"></span>' + (isReturning ? 'Returning donor' : 'New visitor');
+  });
+
+  function goToGateway(){
+    gwTxt.textContent = 'Redirecting to secure payment gateway…';
+    gwSub.textContent = 'Saved amount $' + savedAmount.toLocaleString('en-US') + ' · saved payment method on file';
+    gwOverlay.classList.add('show');
+    setTimeout(function(){
+      gwTxt.textContent = '✅ This would open the payment gateway directly';
+      gwSub.textContent = 'No amount picker, no form — details were already on file';
+    }, 1100);
+    setTimeout(function(){ gwOverlay.classList.remove('show'); }, 2600);
+  }
+
+  window.__donateEntry = function(){
+    if(isReturning) goToGateway();
+    else open();
+  };
+
   function open(){ overlay.classList.add('open'); }
   function close(){ overlay.classList.remove('open'); }
 
   ['mainDonateBtn','inlineCta'].forEach(function(id){
-    document.getElementById(id).addEventListener('click', open);
+    document.getElementById(id).addEventListener('click', window.__donateEntry);
   });
   document.querySelectorAll('.fab.donate').forEach(function(btn){
-    btn.addEventListener('click', open);
+    btn.addEventListener('click', window.__donateEntry);
   });
   overlay.addEventListener('click', function(e){ if(e.target === overlay) close(); });
 
