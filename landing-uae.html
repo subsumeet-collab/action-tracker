@@ -176,6 +176,8 @@ img,svg{display:block;max-width:100%}
 .bottom-bar{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;background:rgba(239,248,243,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:10px 12px calc(10px + var(--safe-b));z-index:40;transform:translateX(-50%) translateY(120%);transition:transform .3s ease}
 .bottom-bar.visible{transform:translateX(-50%) translateY(0)}
 .bb-icon{width:44px;height:44px;border-radius:12px;background:var(--card2);border:1px solid var(--line);color:var(--ink);display:grid;place-items:center;font-size:18px;flex:0 0 auto}
+.bb-icon.whatsapp{background:#E7F9EE;border-color:#25D366}
+.bb-icon.whatsapp svg{width:22px;height:22px}
 .bb-donate{flex:1;padding:13px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:#fff;font-weight:800;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:6px}
 
 /* ===== Donation bottom sheet ===== */
@@ -424,7 +426,17 @@ img,svg{display:block;max-width:100%}
 <div class="bottom-bar">
   <button class="bb-icon" id="shareBtn" aria-label="Share">↗</button>
   <button class="bb-donate" id="mainDonateBtn">❤️ <span id="mainDonateLabel">Donate AED 100</span></button>
-  <button class="bb-icon" id="callBtn" aria-label="Call organizer">📞</button>
+  <!-- BACKEND: this WhatsApp trigger needs a product decision on where it
+       routes -- (a) a live-agent handoff, alerting the Failed-Donation /
+       GEM team's WhatsApp Business line so a human follows up with this
+       donor, or (b) an automated WhatsApp chatbot flow (FAQ / support
+       bot) the donor talks to directly. Needs a configurable WhatsApp
+       Business number (or chatbot flow ID) and a prefilled message
+       template per fundraiser/case, likely varying by whether the donor
+       arrives here after a failed payment vs. browsing normally. -->
+  <button class="bb-icon whatsapp" id="callBtn" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 32 32" fill="#25D366" xmlns="http://www.w3.org/2000/svg"><path d="M16.004 3C9.096 3 3.5 8.596 3.5 15.504c0 2.362.656 4.573 1.796 6.463L3 29l7.2-2.257a12.44 12.44 0 0 0 5.804 1.44h.004c6.908 0 12.504-5.596 12.504-12.504S22.912 3 16.004 3zm0 22.71a10.2 10.2 0 0 1-5.2-1.424l-.373-.222-3.86 1.21 1.238-3.763-.243-.386a10.18 10.18 0 0 1-1.566-5.421c0-5.632 4.583-10.215 10.215-10.215 5.632 0 10.215 4.583 10.215 10.215 0 5.632-4.583 10.215-10.215 10.215l-.211-.209zm5.596-7.65c-.307-.153-1.815-.896-2.096-.998-.281-.102-.486-.153-.69.153-.205.307-.79.998-.968 1.203-.179.205-.358.23-.665.077-.307-.153-1.294-.477-2.465-1.52-.911-.813-1.526-1.816-1.705-2.123-.179-.307-.019-.473.134-.626.138-.137.307-.358.46-.537.153-.179.204-.307.307-.512.102-.205.051-.384-.026-.537-.077-.153-.69-1.662-.945-2.276-.249-.598-.502-.517-.69-.527-.179-.008-.384-.01-.588-.01a1.13 1.13 0 0 0-.818.384c-.281.307-1.074 1.05-1.074 2.56s1.1 2.97 1.253 3.176c.153.205 2.164 3.305 5.243 4.634.732.316 1.303.505 1.748.646.734.234 1.403.201 1.932.122.589-.088 1.815-.742 2.071-1.459.256-.716.256-1.331.179-1.459-.077-.128-.281-.204-.588-.358z"/></svg>
+  </button>
 </div>
 
 <div class="sheet-overlay" id="sheetOverlay">
@@ -751,7 +763,9 @@ function switchTab(name){
   document.getElementById('shareBtn').addEventListener('click', share);
   document.getElementById('heroShareBtn').addEventListener('click', share);
   document.getElementById('callBtn').addEventListener('click', function(){
-    showToast('This would call/WhatsApp the organizer');
+    var msg = encodeURIComponent("Hi, I need help with Satyam's fundraiser.");
+    window.open('https://wa.me/910000000000?text=' + msg, '_blank');
+    showToast('Opening WhatsApp\u2026');
   });
   var curBtn = document.getElementById('currencyBtn');
   if(curBtn) curBtn.addEventListener('click', function(){ showToast('Currency: AED · GBP · EUR · AUD'); });
