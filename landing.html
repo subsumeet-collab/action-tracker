@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>Help Satyam Fight Cancer — Fundraiser</title>
+<title>8-year-old Siya needs one last transplant to survive — Fundraiser</title>
 <meta name="description" content="Mobile-first fundraiser landing page prototype: swipeable story hero, sticky donate bar, tabbed proof sections.">
 <!-- BACKEND / SESSION CLASSIFICATION (New User vs Returning User)
      Session-data-availability check ONLY -- NOT based on donation
@@ -153,6 +153,19 @@ img,svg{display:block;max-width:100%}
 .story-text.clamped{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
 .readmore{margin-top:8px;font-weight:700;font-size:13px;color:var(--accent2)}
 
+.story-quote{margin:14px 0;padding:2px 0 2px 14px;border-left:3px solid var(--accent2);font-size:13.8px;font-style:italic;line-height:1.6;color:var(--body-ink)}
+.story-bold{font-size:13.8px;line-height:1.65;color:var(--body-ink);font-weight:700;margin-top:14px}
+
+/* ===== Where your money goes (cost breakdown card) ===== */
+.money-card{margin:20px 0 16px}
+.money-title{font-weight:800;font-size:14.5px;margin-bottom:4px}
+.money-sub{font-size:11.5px;color:var(--body-muted);line-height:1.5;margin-bottom:14px}
+.money-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--body-line)}
+.money-ic{width:30px;height:30px;border-radius:8px;background:var(--ok-bg);color:var(--ok);display:grid;place-items:center;font-size:14px;flex:0 0 auto}
+.money-label{flex:1;font-size:13px;font-weight:600;color:var(--body-ink)}
+.money-amt{font-size:13px;font-weight:800;color:var(--body-ink);white-space:nowrap}
+.money-total{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:2px;font-weight:800;font-size:14.5px}
+
 .organizer{display:flex;gap:10px;align-items:center;margin-top:16px;padding:12px;background:var(--body-card);border:1px solid var(--body-line);border-radius:12px}
 .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent2-dark));display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px;flex:0 0 auto}
 .organizer .who{font-size:12px;color:var(--body-muted)}
@@ -257,8 +270,8 @@ img,svg{display:block;max-width:100%}
         <button class="fab save" aria-label="Save fundraiser">🔖</button>
         <button class="fab donate" aria-label="Donate now">❤️</button>
       </div>
-      <div class="slide-title">Satyam, age 4</div>
-      <div class="slide-meta"><span>Delhi</span><span class="dot"></span><span>Relapsed Blood Cancer</span></div>
+      <div class="slide-title">Siya, age 8</div>
+      <div class="slide-meta"><span>New Delhi</span><span class="dot"></span><span>Second Bone-Marrow Transplant</span></div>
     </div>
     <div class="slide s1" data-i="1" data-media="video">
       <div class="art" style="background-image:url('images/slide-2-satyam-resting.png'), radial-gradient(circle at 70% 30%,#1f5c4f,#0B0D12 70%)"></div>
@@ -294,8 +307,8 @@ img,svg{display:block;max-width:100%}
         <button class="fab save" aria-label="Save fundraiser">🔖</button>
         <button class="fab donate" aria-label="Donate now">❤️</button>
       </div>
-      <div class="slide-title">Tanya's bone marrow can save him</div>
-      <div class="slide-meta"><span>His 6-year-old sister is his donor match</span></div>
+      <div class="slide-title">Her father is her donor match</div>
+      <div class="slide-meta"><span>He became her bone-marrow donor in January 2026</span></div>
     </div>
   </div>
   </div>
@@ -304,8 +317,8 @@ img,svg{display:block;max-width:100%}
 </section>
 
 <div class="page-header">
-  <h1 class="ph-title">Satyam, age 4</h1>
-  <div class="ph-meta"><span>Delhi</span><span class="dot"></span><span>Relapsed Blood Cancer</span></div>
+  <h1 class="ph-title">8-year-old Siya needs one last transplant to survive.</h1>
+  <div class="ph-meta"><span>New Delhi</span><span class="dot"></span><span>Second Bone-Marrow Transplant</span></div>
 </div>
 
 <div class="body-zone">
@@ -344,7 +357,7 @@ img,svg{display:block;max-width:100%}
          auto-expire/hide once past the end date, without a code deploy. -->
     <div class="milestone">
       <span class="milestone-ic">💉</span>
-      <span class="milestone-txt"><b>5 chemo sessions done.</b> Next chemotherapy on <b>22 Aug</b> — will cost <b>₹5,000</b>.</span>
+      <span class="milestone-txt"><b>First transplant unsuccessful.</b> A second bone-marrow transplant is now being scheduled at <b>Sir Ganga Ram Hospital</b>.</span>
     </div>
 
     <div class="ticker">
@@ -380,29 +393,49 @@ img,svg{display:block;max-width:100%}
 
   <div class="panel active" id="panel-story">
     <div class="video-card" id="videoCard">
-      <div class="vtop"><span class="org-ic">❤</span><span class="t">Satyam's Story, in his mother's words</span></div>
+      <div class="vtop"><span class="org-ic">❤</span><span class="t">Siya's Story, in her father's words</span></div>
       <div class="vplay">▶</div>
       <div class="vbottom"><span class="dur">2:14</span><span>↗ Share</span></div>
     </div>
 
     <p class="story-text clamped" id="storyText">
-      <i>Satyam is 4. His sister Tanya is 6. They should be fighting over toys, teasing each other, and
-      getting scolded by their parents for making a mess. Instead, Satyam is fighting <b>relapsed blood
-      cancer</b>. He beat it once already — but the cancer has returned, and this time chemotherapy alone
-      won't be enough. Doctors say his best chance now is a <b>bone marrow transplant</b>, and in an
-      extraordinary stroke of luck, his own sister Tanya is a match. The transplant, hospital stay and
-      post-transplant care are estimated to cost upwards of <b>₹8,00,000</b> — money this family does not
-      have. Every contribution, however small, moves Satyam closer to the transplant that could let him and
-      Tanya go back to being ordinary siblings again. All medical and identity documents have been verified
-      — see the Documents tab below.</i>
+      <i>What followed was 15 painful injections and 2 rounds of chemotherapy in a body far too
+      small for them. In January 2026, Siya's own father became her bone-marrow donor — giving a
+      literal piece of himself to save her.</i>
     </p>
     <button class="readmore" id="readMoreBtn">Read more</button>
 
+    <blockquote class="story-quote">"The transplant failed. Today Siya is still in hospital, still fighting, still smiling through the pain."</blockquote>
+
+    <p class="story-bold">The only road left is a second bone-marrow transplant at <b>Sir Ganga Ram Hospital</b>. Her father earns a modest salary at a private company. The family has already borrowed from every relative and neighbour they have. They cannot carry this alone — but together, strangers can.</p>
+
+    <p class="story-bold">You don't know Siya. That's exactly why this matters. A child's survival shouldn't depend on whether her family is rich. It can depend on you.</p>
+
+    <!-- BACKEND: "Where your money goes" is something we CAN control for --
+         unlike hero images or organic social proof, this is a structured,
+         verifiable data set we already hold per case (the hospital's
+         official cost-estimate letter). It should be modeled as a
+         per-fundraiser breakdown -- an ordered list of {icon, label,
+         amount} -- sourced from that verified estimate, with the total
+         computed from the line items, rather than hardcoded page copy
+         that can silently drift out of sync with the real, verified
+         numbers. -->
+    <div class="section-h" style="margin-top:20px">Where your money goes</div>
+    <div class="progress-card money-card">
+      <div class="money-title">Every rupee is accounted for</div>
+      <p class="money-sub">Treatment estimate verified against the hospital's official letter. Funds are released directly to Sir Ganga Ram Hospital.</p>
+      <div class="money-row"><span class="money-ic">➕</span><span class="money-label">Bone-marrow transplant procedure</span><span class="money-amt">₹24,00,000</span></div>
+      <div class="money-row"><span class="money-ic">🏥</span><span class="money-label">ICU &amp; post-transplant care</span><span class="money-amt">₹10,50,000</span></div>
+      <div class="money-row"><span class="money-ic">💊</span><span class="money-label">Medication &amp; immunotherapy</span><span class="money-amt">₹5,50,000</span></div>
+      <div class="money-row" style="border-bottom:none"><span class="money-ic">🧪</span><span class="money-label">Lab tests &amp; donor screening</span><span class="money-amt">₹2,00,000</span></div>
+      <div class="money-total"><span>Total needed</span><span>₹42,00,000</span></div>
+    </div>
+
     <div class="organizer">
-      <div class="avatar">SM</div>
+      <div class="avatar">SF</div>
       <div>
-        <div class="name">Satyam's Mother</div>
-        <div class="who">Organizer &middot; Campaigning for her son</div>
+        <div class="name">Siya's Father</div>
+        <div class="who">Organizer &middot; Campaigning for his daughter</div>
       </div>
     </div>
 
@@ -410,7 +443,7 @@ img,svg{display:block;max-width:100%}
     <div class="hospital-card">
       <div>
         <div class="lbl">Hospital</div>
-        <div class="link">Max Super Speciality Hospital, New Delhi</div>
+        <div class="link">Sir Ganga Ram Hospital, New Delhi</div>
       </div>
       <button class="share-ic" aria-label="Share hospital link">↗</button>
     </div>
@@ -418,8 +451,8 @@ img,svg{display:block;max-width:100%}
 
   <div class="panel" id="panel-documents">
     <div class="section-h">Verified documents</div>
-    <div class="doc-item"><div class="doc-ic">🩺</div><div><div class="t">Diagnosis report</div><div class="s">Relapsed blood cancer &middot; Verified</div></div><div class="chev">›</div></div>
-    <div class="doc-item"><div class="doc-ic">💳</div><div><div class="t">Treatment cost estimate</div><div class="s">₹8,00,000 &middot; Verified</div></div><div class="chev">›</div></div>
+    <div class="doc-item"><div class="doc-ic">🩺</div><div><div class="t">Medical records</div><div class="s">First transplant, unsuccessful &middot; Verified</div></div><div class="chev">›</div></div>
+    <div class="doc-item"><div class="doc-ic">💳</div><div><div class="t">Treatment cost estimate</div><div class="s">₹42,00,000 &middot; Verified</div></div><div class="chev">›</div></div>
     <p style="font-size:12px;color:var(--body-muted);margin-top:2px">✅ Identity proofs for the patient and organizer have also been verified.</p>
   </div>
 
@@ -427,15 +460,15 @@ img,svg{display:block;max-width:100%}
     <div class="section-h">Latest updates</div>
     <div class="update-item">
       <div class="update-dot-col"><div class="update-dot"></div><div class="update-line"></div></div>
-      <div class="update-body"><div class="d">2 days ago</div><div class="t">Tanya confirmed as donor match</div><div class="p">Test results confirmed Tanya is a suitable bone marrow match for her brother. The transplant is now being scheduled.</div></div>
+      <div class="update-body"><div class="d">2 days ago</div><div class="t">First transplant declared unsuccessful</div><div class="p">Doctors confirmed Siya's first bone-marrow transplant did not take. A second transplant at Sir Ganga Ram Hospital is now being scheduled.</div></div>
     </div>
     <div class="update-item">
       <div class="update-dot-col"><div class="update-dot"></div><div class="update-line"></div></div>
-      <div class="update-body"><div class="d">3 weeks ago</div><div class="t">Cancer confirmed to have relapsed</div><div class="p">Follow-up tests confirmed Satyam's blood cancer has returned, and doctors recommended a bone marrow transplant.</div></div>
+      <div class="update-body"><div class="d">3 weeks ago</div><div class="t">First transplant performed</div><div class="p">Siya's father, a confirmed donor match, gave a piece of his own bone marrow to Siya in January 2026.</div></div>
     </div>
     <div class="update-item">
       <div class="update-dot-col"><div class="update-dot"></div></div>
-      <div class="update-body"><div class="d">2 months ago</div><div class="t">Fundraiser started</div><div class="p">Satyam's mother shared his story and diagnosis documents to begin raising funds for the transplant.</div></div>
+      <div class="update-body"><div class="d">2 months ago</div><div class="t">Fundraiser started</div><div class="p">Siya's father shared her story and medical records to begin raising funds for her bone-marrow transplant.</div></div>
     </div>
   </div>
 
@@ -446,7 +479,7 @@ img,svg{display:block;max-width:100%}
       <div class="faq-a"><p>Yes, donations are eligible for tax exemption under Section 80G. A receipt is emailed automatically after payment.</p></div>
     </div>
     <div class="faq-item">
-      <button class="faq-q">How do I know the funds reach Satyam? <span class="ic">+</span></button>
+      <button class="faq-q">How do I know the funds reach Siya? <span class="ic">+</span></button>
       <div class="faq-a"><p>Funds are disbursed directly to the verified hospital against submitted bills, not to the organizer's personal account.</p></div>
     </div>
     <div class="faq-item">
@@ -722,7 +755,7 @@ function switchTab(name){
     'Rohit K. donated ₹1,100 · 2 min ago',
     'Anonymous donated ₹500 · 6 min ago',
     'Priya S. donated ₹2,500 · 14 min ago',
-    '3,214 people have supported Satyam so far',
+    '3,214 people have supported Siya so far',
     'Vikram P. donated ₹5,000 · 31 min ago'
   ];
   var i = 0;
@@ -890,13 +923,13 @@ function switchTab(name){
 
 (function(){
   document.getElementById('videoCard').addEventListener('click', function(){
-    showToast('This would play Satyam\'s story video');
+    showToast('This would play Siya\'s story video');
   });
 })();
 
 (function(){
   function share(){
-    var shareData = { title: 'Help Satyam Fight Cancer', text: "Satyam's sister Tanya can save him with a bone marrow transplant — every rupee counts.", url: location.href };
+    var shareData = { title: '8-year-old Siya needs one last transplant to survive', text: "Siya's father was already her bone-marrow donor once — she needs one more transplant to survive. Every rupee counts.", url: location.href };
     if(navigator.share){
       navigator.share(shareData).catch(function(){});
     } else if(navigator.clipboard){
@@ -908,7 +941,7 @@ function switchTab(name){
   document.getElementById('shareBtn').addEventListener('click', share);
   document.getElementById('heroShareBtn').addEventListener('click', share);
   document.getElementById('callBtn').addEventListener('click', function(){
-    var msg = encodeURIComponent("Hi, I need help with Satyam's fundraiser.");
+    var msg = encodeURIComponent("Hi, I need help with Siya's fundraiser.");
     window.open('https://wa.me/910000000000?text=' + msg, '_blank');
     showToast('Opening WhatsApp\u2026');
   });
