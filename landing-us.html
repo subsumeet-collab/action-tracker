@@ -5,7 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>Help Satyam Fight Cancer — Fundraiser</title>
 <meta name="description" content="Mobile-first fundraiser landing page prototype: swipeable story hero, sticky donate bar, tabbed proof sections.">
-<script>window.__isReturningDonor = typeof __RETURNING_FLAG__ !== 'undefined' ? __RETURNING_FLAG__ : false;</script>
+<!-- BACKEND: New User vs Returning User is a SESSION-LEVEL DATA
+     AVAILABILITY check, not a historical/account-age/prior-visit check.
+       Returning User = name AND phone AND email are ALL already present
+                         in the current session -> skip the contact form,
+                         let them enter the donation amount directly on
+                         this page (the impact-amount-card), and go
+                         straight to SPC Page 2 (payment details) on
+                         "Donate Now".
+       New User        = ANY of name / phone / email is missing from the
+                         current session -> show the contact form first,
+                         then the amount, then SPC Page 2.
+     This has nothing to do with whether the person has donated before,
+     how old their account is, or whether they've visited the platform
+     previously. window.__sessionUserKnown simulates this check for the
+     prototype -- wire it to real session/auth state (name && phone &&
+     email all present) in production. -->
+<script>window.__sessionUserKnown = typeof __RETURNING_FLAG__ !== 'undefined' ? __RETURNING_FLAG__ : false;</script>
 <style>
 :root{
   --bg:#EFF8F3;--card:#FFFFFF;--card2:#E3F3E9;--ink:#14213D;--muted:#6B7280;
@@ -31,12 +47,6 @@ img,svg{display:block;max-width:100%}
 .ig-logo{display:inline-flex;align-items:center;gap:6px;font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
 .ig-logo-mark{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;border-radius:6px;background:var(--accent2);color:#fff;font-size:14px;font-weight:900;line-height:1;flex:0 0 auto}
 .hero-share-pill{font-size:11.5px;font-weight:700;color:var(--muted);border:1px solid var(--line);padding:5px 11px;border-radius:20px}
-.gateway-overlay{position:fixed;inset:0;z-index:90;background:rgba(20,33,61,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;opacity:0;pointer-events:none;transition:opacity .2s}
-.gateway-overlay.show{opacity:1;pointer-events:auto}
-.gateway-spinner{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;animation:gw-spin .8s linear infinite}
-@keyframes gw-spin{to{transform:rotate(360deg)}}
-.gateway-overlay .gw-txt{font-size:13.5px;font-weight:600;text-align:center;max-width:80%}
-.gateway-overlay .gw-sub{font-size:11.5px;color:#B9C2D6;text-align:center;max-width:80%}
 
 .hero-stack{padding:0 24px 4px 12px}
 .hero-stack-inner{position:relative;aspect-ratio:3/4.6;touch-action:pan-y}
@@ -224,6 +234,16 @@ img,svg{display:block;max-width:100%}
 .custom-amt:focus{outline:none;border-color:var(--accent2)}
 .pay-btn{width:100%;padding:14px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:#fff;font-weight:800;font-size:15px}
 .anon-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12.5px;color:var(--body-muted)}
+/* ===== New/Returning user step layout (reuses .custom-amt / .pay-btn / .amount-grid) ===== */
+.step-hidden{display:none}
+.sheet.spc-sheet{height:88vh;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column}
+.spc-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--body-muted);margin-bottom:14px}
+.spc-summary{background:var(--card2);border-radius:12px;padding:12px 14px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:baseline}
+.spc-summary .lbl{font-size:11.5px;color:var(--body-muted)}
+.spc-summary .amt{font-size:20px;font-weight:800;color:var(--body-ink)}
+.spc-row{display:flex;gap:10px}
+.spc-row .custom-amt{flex:1}
+.spc-note{font-size:11px;color:var(--body-muted);text-align:center;margin-top:6px}
 
 .info-icon{font-size:26px;margin-bottom:10px}
 .info-body{font-size:13.5px;line-height:1.6;color:#333;margin-bottom:16px}
@@ -363,16 +383,21 @@ img,svg{display:block;max-width:100%}
   <!-- BACKEND: this block mirrors a benchmarked US donation-page pattern
        (short story + amount card) — 1-2 static images, a condensed story
        teaser, a "read full story" link into the existing Story tab, and an
-       inline amount card that opens the same donation sheet used elsewhere
-       on the page (including the returning-donor gateway skip). No new
-       payment logic — reuses it. -->
+       inline amount card. The banner/teaser/read-full-story are shown to
+       everyone; the amount card itself (.impact-amount-card) is this
+       market's version of the "quick donate" card and is gated by the same
+       session-classification rule as the rest of the flow: shown ONLY for
+       a Returning User (name+phone+email already in session), letting them
+       pick an amount right here and go straight to SPC Page 2. Hidden for
+       a New User, who instead goes through the contact form in the sheet
+       first (see the session-classification note near the top of <head>). -->
   <section class="impact-block">
     <div class="impact-banner"><div class="ib-txt">⏳ Every day without surgery lowers Satyam's chances.</div></div>
     <div class="impact-h">Help Satyam Get His Bone Marrow Transplant</div>
     <p class="impact-short">Satyam is 4 and fighting relapsed blood cancer. His sister Tanya is a donor match — but the transplant, hospital stay and after-care will cost upwards of $9,600, money his family doesn't have.</p>
     <button type="button" class="impact-readfull" id="impactReadFull">Read his full story →</button>
 
-    <div class="impact-amount-card">
+    <div class="impact-amount-card step-hidden" id="quickDonateCard">
       <div class="iac-title">Make an impact today</div>
       <div class="iac-freq" id="iacFreq">
         <button type="button" class="iac-freq-btn active" data-freq="once">Give once</button>
@@ -386,7 +411,8 @@ img,svg{display:block;max-width:100%}
         <button type="button" class="iac-chip" data-amt="500">$500</button>
         <button type="button" class="iac-chip" data-amt="0" id="iacCustom">Custom</button>
       </div>
-      <button type="button" class="iac-cta" id="iacCta">Choose an amount</button>
+      <input class="custom-amt" id="qdCustomInput" type="number" inputmode="numeric" placeholder="Enter custom amount ($)" style="display:none">
+      <button type="button" class="iac-cta" id="qdPayBtn">Donate Now</button>
     </div>
   </section>
 
@@ -482,7 +508,7 @@ img,svg{display:block;max-width:100%}
 
 <div class="bottom-bar">
   <button class="bb-icon" id="shareBtn" aria-label="Share">↗</button>
-  <button class="bb-donate" id="mainDonateBtn">❤️ <span id="mainDonateLabel">Donate $50</span></button>
+  <button class="bb-donate" id="mainDonateBtn">❤️ Donate Now</button>
   <!-- BACKEND: this WhatsApp trigger needs a product decision on where it
        routes -- (a) a live-agent handoff, alerting the Failed-Donation /
        GEM team's WhatsApp Business line so a human follows up with this
@@ -499,29 +525,45 @@ img,svg{display:block;max-width:100%}
 <div class="sheet-overlay" id="sheetOverlay">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Choose an amount</div>
-    <div class="freq-toggle" id="freqToggle" style="display:flex;gap:6px;margin-bottom:12px">
-      <button class="freq-btn active" data-freq="once">One-time</button>
-      <button class="freq-btn" data-freq="monthly">Monthly</button>
+
+    <!-- STEP 1 of 2 -- New User only. Skipped entirely for a Returning
+         User (see the session-classification note near the top of
+         <head>). -->
+    <div id="sheetStepContact">
+      <div class="sheet-title">Your details</div>
+      <input class="custom-amt" id="cfName" type="text" placeholder="Full name">
+      <input class="custom-amt" id="cfPhone" type="tel" inputmode="tel" placeholder="Phone number">
+      <input class="custom-amt" id="cfEmail" type="email" placeholder="Email address">
+      <button class="pay-btn" id="cfContinueBtn">Continue</button>
     </div>
-    <div class="impact-card" id="impactCard"><span class="ic">💊</span><span><b>$50</b> could cover a full day of Satyam's chemotherapy medication.</span></div>
-    <div class="amount-grid" id="amountGrid">
-      <button class="amount-chip" data-amt="25">$25<span class="sub">Basic care</span></button>
-      <button class="amount-chip selected" data-amt="50">$50<span class="sub">Most chosen</span></button>
-      <button class="amount-chip" data-amt="100">$100<span class="sub">One day's meds</span></button>
-      <button class="amount-chip" data-amt="250">$250<span class="sub">Big impact</span></button>
-      <button class="amount-chip" data-amt="500">$500<span class="sub">Major support</span></button>
-      <button class="amount-chip" data-amt="0" id="customChip">Custom</button>
+
+    <!-- STEP 2 of 2 -- shown immediately for a Returning User; shown
+         after Step 1 for a New User. -->
+    <div id="sheetStepAmount" class="step-hidden">
+      <div class="sheet-title">Choose an amount</div>
+      <div class="freq-toggle" id="freqToggle" style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="freq-btn active" data-freq="once">One-time</button>
+        <button class="freq-btn" data-freq="monthly">Monthly</button>
+      </div>
+      <div class="impact-card" id="impactCard"><span class="ic">💊</span><span><b>$50</b> could cover a full day of Satyam's chemotherapy medication.</span></div>
+      <div class="amount-grid" id="amountGrid">
+        <button class="amount-chip" data-amt="25">$25<span class="sub">Basic care</span></button>
+        <button class="amount-chip selected" data-amt="50">$50<span class="sub">Most chosen</span></button>
+        <button class="amount-chip" data-amt="100">$100<span class="sub">One day's meds</span></button>
+        <button class="amount-chip" data-amt="250">$250<span class="sub">Big impact</span></button>
+        <button class="amount-chip" data-amt="500">$500<span class="sub">Major support</span></button>
+        <button class="amount-chip" data-amt="0" id="customChip">Custom</button>
+      </div>
+      <input class="custom-amt" id="customInput" type="number" inputmode="numeric" placeholder="Enter custom amount ($)" style="display:none">
+      <div class="dedicate-row">
+        <button type="button" class="dedicate-toggle" id="dedicateToggle">Dedicate my donation <span class="chev">⌄</span></button>
+        <input class="dedicate-input" id="dedicateInput" type="text" placeholder="In honor / memory of…">
+      </div>
+      <label class="anon-row"><input type="checkbox" id="anonCheck"> Donate anonymously</label>
+      <label class="adsrc-row"><input type="checkbox" id="adSrcCheck"> I came here from a video ad</label>
+      <button class="pay-btn" id="payBtn">Donate Now</button>
+      <p style="font-size:10.5px;color:var(--body-muted);line-height:1.5;margin-top:10px">ImpactGuru's US partner is a 501(c)(3) tax-exempt organization, and your donation is tax deductible within the guidelines of U.S. law. Your receipt will be emailed upon successful completion.</p>
     </div>
-    <input class="custom-amt" id="customInput" type="number" inputmode="numeric" placeholder="Enter custom amount ($)" style="display:none">
-    <div class="dedicate-row">
-      <button type="button" class="dedicate-toggle" id="dedicateToggle">Dedicate my donation <span class="chev">⌄</span></button>
-      <input class="dedicate-input" id="dedicateInput" type="text" placeholder="In honor / memory of…">
-    </div>
-    <label class="anon-row"><input type="checkbox" id="anonCheck"> Donate anonymously</label>
-    <label class="adsrc-row"><input type="checkbox" id="adSrcCheck"> I came here from a video ad</label>
-    <button class="pay-btn" id="payBtn">Proceed to Pay $50</button>
-    <p style="font-size:10.5px;color:var(--body-muted);line-height:1.5;margin-top:10px">ImpactGuru's US partner is a 501(c)(3) tax-exempt organization, and your donation is tax deductible within the guidelines of U.S. law. Your receipt will be emailed upon successful completion.</p>
   </div>
 </div>
 
@@ -535,19 +577,30 @@ img,svg{display:block;max-width:100%}
   </div>
 </div>
 
-<!-- BACKEND: when a donor is recognized (logged in, or arriving via a link/token
-     tied to a saved payment method) and we already hold everything the
-     payment step needs, the amount-selection sheet should be skippable —
-     send them straight to the payment gateway with their last-used or
-     default amount pre-filled, one tap to confirm. Needs a "known donor"
-     signal from auth/CRM, a saved default amount + payment method per
-     donor, and a gateway deep-link that accepts a pre-set amount. The
-     toggle below simulates this for demo purposes only — it is not a
-     production control. -->
-<div class="gateway-overlay" id="gatewayOverlay">
-  <div class="gateway-spinner"></div>
-  <div class="gw-txt" id="gwTxt">Redirecting to secure payment gateway…</div>
-  <div class="gw-sub" id="gwSub"></div>
+<!-- SPC PAGE 2 -- reached by "Donate Now" from either the sheet (New
+     User, after the contact form) or the quick-donate card / sheet
+     (Returning User, no form). Reuses the same sheet-overlay/.sheet
+     chrome as everywhere else, just taller. This is the one place the
+     amount is allowed in a button label ("Pay $X") -- it's a payment
+     confirmation, not a "Donate" entry CTA. -->
+<div class="sheet-overlay" id="spcOverlay">
+  <div class="sheet spc-sheet">
+    <div class="sheet-handle"></div>
+    <button type="button" class="spc-back" id="spcBackBtn">← Back</button>
+    <div class="sheet-title">Payment details</div>
+    <div class="spc-summary">
+      <span class="lbl">You're donating</span>
+      <span class="amt" id="spcAmountLabel">$50</span>
+    </div>
+    <input class="custom-amt" id="spcCardName" type="text" placeholder="Name on card">
+    <input class="custom-amt" id="spcCardNumber" type="text" inputmode="numeric" placeholder="Card number">
+    <div class="spc-row">
+      <input class="custom-amt" id="spcExpiry" type="text" placeholder="MM / YY">
+      <input class="custom-amt" id="spcCvv" type="text" inputmode="numeric" placeholder="CVV">
+    </div>
+    <button class="pay-btn" id="spcPayBtn">Pay $50</button>
+    <p class="spc-note">🔒 Payments are encrypted and processed securely.</p>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -737,36 +790,64 @@ function switchTab(name){
 })();
 
 (function(){
+  function fmt(n, freq){ return '$' + (n || 0).toLocaleString('en-US') + (freq === 'monthly' ? '/mo' : ''); }
+
   var overlay = document.getElementById('sheetOverlay');
+  var stepContact = document.getElementById('sheetStepContact');
+  var stepAmount = document.getElementById('sheetStepAmount');
+  var cfName = document.getElementById('cfName');
+  var cfPhone = document.getElementById('cfPhone');
+  var cfEmail = document.getElementById('cfEmail');
+  var cfContinueBtn = document.getElementById('cfContinueBtn');
+
   var grid = document.getElementById('amountGrid');
   var customInput = document.getElementById('customInput');
   var payBtn = document.getElementById('payBtn');
   var selected = 50;
 
-  var isReturning = window.__isReturningDonor === true;
-  var savedAmount = 50;
-  var gwOverlay = document.getElementById('gatewayOverlay');
-  var gwTxt = document.getElementById('gwTxt');
-  var gwSub = document.getElementById('gwSub');
+  var quickDonateCard = document.getElementById('quickDonateCard');
+  var iacGrid = document.getElementById('iacGrid');
+  var iacFreqEl = document.getElementById('iacFreq');
+  var iacCustom = document.getElementById('iacCustom');
+  var qdCustomInput = document.getElementById('qdCustomInput');
+  var qdPayBtn = document.getElementById('qdPayBtn');
+  var qdSelected = 50;
+  var qdFreq = 'once';
 
-  function goToGateway(){
-    gwTxt.textContent = 'Redirecting to secure payment gateway…';
-    gwSub.textContent = 'Saved amount $' + savedAmount.toLocaleString('en-US') + ' · saved payment method on file';
-    gwOverlay.classList.add('show');
-    setTimeout(function(){
-      gwTxt.textContent = '✅ This would open the payment gateway directly';
-      gwSub.textContent = 'No amount picker, no form — details were already on file';
-    }, 1100);
-    setTimeout(function(){ gwOverlay.classList.remove('show'); }, 2600);
+  var spcOverlay = document.getElementById('spcOverlay');
+  var spcAmountLabel = document.getElementById('spcAmountLabel');
+  var spcPayBtn = document.getElementById('spcPayBtn');
+  var spcBackBtn = document.getElementById('spcBackBtn');
+  var spcReturnTo = null; // 'sheet' | 'quick' -- where Back should go
+
+  function isReturning(){ return window.__sessionUserKnown === true; }
+
+  // Renders the two entry surfaces to match current session state. Called
+  // on load and again right after a New User's contact form is submitted,
+  // so the page never shows a New User an experience meant for a
+  // Returning User (or vice-versa) once the underlying session data changes.
+  function syncToSessionState(){
+    if(isReturning()){
+      quickDonateCard.classList.remove('step-hidden');
+    } else {
+      quickDonateCard.classList.add('step-hidden');
+    }
   }
+  syncToSessionState();
 
-  window.__donateEntry = function(){
-    if(isReturning) goToGateway();
-    else open();
-  };
+  function openSheet(){
+    if(isReturning()){
+      stepContact.classList.add('step-hidden');
+      stepAmount.classList.remove('step-hidden');
+    } else {
+      stepContact.classList.remove('step-hidden');
+      stepAmount.classList.add('step-hidden');
+    }
+    overlay.classList.add('open');
+  }
+  function closeSheet(){ overlay.classList.remove('open'); }
 
-  function open(){ overlay.classList.add('open'); }
-  function close(){ overlay.classList.remove('open'); }
+  window.__donateEntry = openSheet;
 
   ['mainDonateBtn','inlineCta'].forEach(function(id){
     document.getElementById(id).addEventListener('click', window.__donateEntry);
@@ -774,7 +855,23 @@ function switchTab(name){
   document.querySelectorAll('.fab.donate').forEach(function(btn){
     btn.addEventListener('click', window.__donateEntry);
   });
-  overlay.addEventListener('click', function(e){ if(e.target === overlay) close(); });
+  overlay.addEventListener('click', function(e){ if(e.target === overlay) closeSheet(); });
+
+  cfContinueBtn.addEventListener('click', function(){
+    if(!cfName.value.trim() || !cfPhone.value.trim() || !cfEmail.value.trim()){
+      showToast('Please fill in name, phone and email to continue');
+      return;
+    }
+    // BACKEND: in production this is where name+phone+email get written to
+    // the session (e.g. a session/auth token), which is exactly the
+    // condition window.__sessionUserKnown stands in for here. Flipping it
+    // to true now means this same page session behaves as a Returning User
+    // from this point on -- no form is shown again this session.
+    window.__sessionUserKnown = true;
+    syncToSessionState();
+    stepContact.classList.add('step-hidden');
+    stepAmount.classList.remove('step-hidden');
+  });
 
   grid.addEventListener('click', function(e){
     var chip = e.target.closest('.amount-chip');
@@ -789,26 +886,25 @@ function switchTab(name){
       customInput.style.display = 'none';
       selected = parseInt(chip.dataset.amt, 10);
     }
-    updatePayLabel();
+    updateImpact();
   });
 
   customInput.addEventListener('input', function(){
     selected = parseInt(customInput.value, 10) || 0;
-    updatePayLabel();
+    updateImpact();
   });
 
   var freq = 'once';
   var freqToggle = document.getElementById('freqToggle');
-  if(freqToggle){
-    freqToggle.addEventListener('click', function(e){
-      var b = e.target.closest('.freq-btn');
-      if(!b) return;
-      Array.prototype.forEach.call(freqToggle.children, function(c){ c.classList.remove('active'); });
-      b.classList.add('active');
-      freq = b.dataset.freq;
-      updatePayLabel();
-    });
-  }
+  freqToggle.addEventListener('click', function(e){
+    var b = e.target.closest('.freq-btn');
+    if(!b) return;
+    Array.prototype.forEach.call(freqToggle.children, function(c){ c.classList.remove('active'); });
+    b.classList.add('active');
+    freq = b.dataset.freq;
+    updateImpact();
+  });
+
   var IMPACT = {
     25: '💊 <b>$25</b> could provide a day of basic supportive care.',
     50: '💊 <b>$50</b> could cover a full day of Satyam\'s chemotherapy medication.',
@@ -823,19 +919,10 @@ function switchTab(name){
     impactCard.innerHTML = '<span class="ic">' + parts[0] + '</span><span>' + parts.slice(1).join(' ') + '</span>';
   }
 
-  function updatePayLabel(){
-    var suffix = freq === 'monthly' ? '/mo' : '';
-    payBtn.textContent = 'Proceed to Pay $' + (selected || 0).toLocaleString('en-US') + suffix;
-    if(selected){
-      document.getElementById('mainDonateLabel').textContent = 'Donate $' + selected.toLocaleString('en-US') + suffix;
-    }
-    updateImpact();
-  }
-
   payBtn.addEventListener('click', function(){
     if(!selected){ showToast('Enter an amount to continue'); return; }
-    close();
-    showToast('This would open the secure payment flow');
+    closeSheet();
+    openSpc(selected, freq, 'sheet');
   });
 
   var dedicateToggle = document.getElementById('dedicateToggle');
@@ -847,65 +934,63 @@ function switchTab(name){
     if(opening) dedicateInput.focus();
   });
 
-  window.__presetAmountAndOpen = function(amt, presetFreq){
-    selected = amt;
-    var matchChip = null;
-    Array.prototype.forEach.call(grid.children, function(c){
-      c.classList.remove('selected');
-      if(parseInt(c.dataset.amt, 10) === amt) matchChip = c;
-    });
-    if(matchChip){
-      matchChip.classList.add('selected');
-      customInput.style.display = 'none';
-    } else {
-      document.getElementById('customChip').classList.add('selected');
-      customInput.style.display = 'block';
-      customInput.value = amt;
-    }
-    if(presetFreq && freqToggle){
-      Array.prototype.forEach.call(freqToggle.children, function(c){ c.classList.remove('active'); });
-      var fb = freqToggle.querySelector('[data-freq="' + presetFreq + '"]');
-      if(fb) fb.classList.add('active');
-      freq = presetFreq;
-    }
-    updatePayLabel();
-    window.__donateEntry();
-  };
-})();
-
-(function(){
-  var iacGrid = document.getElementById('iacGrid');
-  var iacFreqEl = document.getElementById('iacFreq');
-  var iacCustom = document.getElementById('iacCustom');
-  var iacCta = document.getElementById('iacCta');
-  var iacSelected = 50;
-  var iacFreqVal = 'once';
-
+  // Quick-donate card (.impact-amount-card) -- Returning User only, directly
+  // on the FR/Story page. Picking an amount here and tapping "Donate Now"
+  // goes straight to SPC Page 2, no sheet, no form.
   iacGrid.addEventListener('click', function(e){
     var chip = e.target.closest('.iac-chip');
     if(!chip) return;
-    if(chip === iacCustom){
-      window.__presetAmountAndOpen(0, iacFreqVal);
-      return;
-    }
     Array.prototype.forEach.call(iacGrid.children, function(c){ c.classList.remove('selected'); });
     chip.classList.add('selected');
-    iacSelected = parseInt(chip.dataset.amt, 10) || 50;
+    if(chip === iacCustom){
+      qdCustomInput.style.display = 'block';
+      qdCustomInput.focus();
+      qdSelected = parseInt(qdCustomInput.value, 10) || 0;
+    } else {
+      qdCustomInput.style.display = 'none';
+      qdSelected = parseInt(chip.dataset.amt, 10) || 0;
+    }
+  });
+  qdCustomInput.addEventListener('input', function(){
+    qdSelected = parseInt(qdCustomInput.value, 10) || 0;
   });
   iacFreqEl.addEventListener('click', function(e){
     var b = e.target.closest('.iac-freq-btn');
     if(!b) return;
     Array.prototype.forEach.call(iacFreqEl.children, function(c){ c.classList.remove('active'); });
     b.classList.add('active');
-    iacFreqVal = b.dataset.freq;
+    qdFreq = b.dataset.freq;
   });
-  iacCta.addEventListener('click', function(){
-    window.__presetAmountAndOpen(iacSelected, iacFreqVal);
+  qdPayBtn.addEventListener('click', function(){
+    if(!qdSelected){ showToast('Enter an amount to continue'); return; }
+    openSpc(qdSelected, qdFreq, 'quick');
   });
 
   document.getElementById('impactReadFull').addEventListener('click', function(){
     switchTab('story');
     document.getElementById('panel-story').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  // SPC Page 2 -- payment details / card entry, reached directly after an
+  // amount (and, for a monthly gift, frequency) is chosen. This is the one
+  // place the amount is allowed in a button label ("Pay $X" / "Pay $X/mo"):
+  // it's a payment confirmation step, not a "Donate" entry CTA.
+  function openSpc(amount, freqVal, from){
+    spcReturnTo = from;
+    spcAmountLabel.textContent = fmt(amount, freqVal);
+    spcPayBtn.textContent = 'Pay ' + fmt(amount, freqVal);
+    spcOverlay.classList.add('open');
+  }
+  function closeSpc(){ spcOverlay.classList.remove('open'); }
+
+  spcOverlay.addEventListener('click', function(e){ if(e.target === spcOverlay) closeSpc(); });
+  spcBackBtn.addEventListener('click', function(){
+    closeSpc();
+    if(spcReturnTo === 'sheet') openSheet();
+  });
+  spcPayBtn.addEventListener('click', function(){
+    closeSpc();
+    showToast('This would open the secure payment flow');
   });
 })();
 
