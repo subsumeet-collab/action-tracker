@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Action Items Tracker</title>
+<title>Action Tracker</title>
 <style>
 :root{
   --bg:#F0F4F8;--surface:#FFFFFF;--surface2:#F7F9FC;--ink:#1A1D26;--muted:#6B7280;
@@ -28,13 +28,14 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:none}
 input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
 ::placeholder{color:var(--muted);opacity:.7}
+a{color:var(--accent)}
 
 /* === Layout === */
-.topbar{background:var(--surface);border-bottom:2px solid var(--line);padding:0 20px;height:54px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:30}
+.topbar{background:var(--surface);border-bottom:2px solid var(--line);padding:0 20px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30;flex-wrap:wrap}
 .logo{font-weight:800;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
 .logo-mark{width:26px;height:26px;background:linear-gradient(135deg,#2563EB,#7C3AED);border-radius:7px;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:900}
 .spacer{flex:1}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-weight:600;font-size:13px;border:1px solid var(--line);background:var(--surface2);cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-weight:600;font-size:13px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;white-space:nowrap}
 .btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
 .btn.primary:hover{filter:brightness(1.08)}
@@ -42,18 +43,31 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .iconbtn{width:32px;height:32px;border-radius:7px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface2)}
 .iconbtn:hover{border-color:var(--accent)}
 
-.wrapper{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.wrapper{padding:18px 20px;display:flex;flex-direction:column;gap:14px;max-width:1600px;margin:0 auto}
 
-/* === Stats bar === */
-.stats{display:flex;gap:10px;flex-wrap:wrap}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 16px;display:flex;align-items:center;gap:10px}
-.stat .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
-.stat .l{font-size:11.5px;color:var(--muted);line-height:1.3}
+/* === Dashboard === */
+.dash{display:flex;gap:10px;flex-wrap:wrap}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left;transition:border-color .12s,transform .12s}
+.tile:hover{border-color:var(--accent);transform:translateY(-1px)}
+.tile.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft) inset}
+.tile .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.tile .l{font-size:11.5px;color:var(--muted);line-height:1.3}
+
+.owner-summary{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.owner-summary summary{padding:9px 14px;font-weight:700;font-size:12.5px;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:.04em;background:var(--surface2)}
+.owner-summary table{width:100%;border-collapse:collapse;font-size:13px}
+.owner-summary th{text-align:left;padding:6px 14px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line)}
+.owner-summary td{padding:6px 14px;border-bottom:1px solid var(--line)}
+.owner-summary tr:last-child td{border-bottom:none}
+.owner-summary tr{cursor:pointer}
+.owner-summary tr:hover{background:var(--surface2)}
+.owner-summary .num{text-align:right;font-variant-numeric:tabular-nums;font-weight:650}
 
 /* === Toolbar === */
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.toolbar input[type=search]{max-width:240px;border-radius:999px;padding:6px 12px}
+.toolbar input[type=search]{max-width:220px;border-radius:999px;padding:6px 12px}
 .toolbar select{width:auto;padding:6px 10px}
+.toolbar input[type=date]{width:auto;padding:6px 8px}
 
 /* view toggle */
 .view-toggle{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px}
@@ -62,20 +76,19 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 
 /* === Kanban === */
 .kanban{display:flex;gap:12px;overflow-x:auto;align-items:flex-start;padding-bottom:8px}
-.kcol{min-width:270px;width:270px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);flex-shrink:0;box-shadow:var(--shadow)}
+.kcol{min-width:250px;width:250px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);flex-shrink:0;box-shadow:var(--shadow)}
 .kcol.dragover{outline:2px dashed var(--accent);outline-offset:-2px}
 .kcol header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:2px solid var(--line);background:var(--surface2);border-radius:var(--r) var(--r) 0 0}
 .kcol header .n{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700}
-.kcol .kcards{padding:10px;display:flex;flex-direction:column;gap:9px;min-height:60px;max-height:calc(100vh - 260px);overflow-y:auto}
+.kcol .kcards{padding:10px;display:flex;flex-direction:column;gap:9px;min-height:60px;max-height:calc(100vh - 320px);overflow-y:auto}
 .kcard{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;cursor:grab}
 .kcard:hover{border-color:var(--accent)}
 .kcard:active{cursor:grabbing}
 .kcard.dragging{opacity:.4}
-.kcard .kc-text{font-size:13px;line-height:1.45;margin-bottom:8px;font-weight:500}
+.kcard .kc-text{font-size:13px;line-height:1.45;margin-bottom:8px;font-weight:500;cursor:pointer}
 .kcard .kc-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
 .kcard .kc-people{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
 .kcard .kc-foot{display:flex;align-items:center;justify-content:space-between;gap:6px}
-.kcard .kc-remarks{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4;border-top:1px dashed var(--line);padding-top:6px}
 .kc-empty{color:var(--muted);font-size:12px;text-align:center;padding:16px 8px}
 
 /* === Table === */
@@ -94,36 +107,35 @@ tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:var(--surface2)}
 td{padding:10px 12px;vertical-align:top}
 td.date-cell{white-space:nowrap;font-size:12.5px}
-td.days-cell{white-space:nowrap;font-size:12.5px;font-weight:700}
-td.action-cell{min-width:280px;max-width:420px;font-size:13px;line-height:1.5}
+td.task-cell{min-width:260px;max-width:420px;font-size:13px;line-height:1.5;cursor:pointer;font-weight:500}
+td.task-cell:hover{color:var(--accent)}
 td.status-cell{white-space:nowrap}
-td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
 
-/* days badge */
-.days-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700}
-.days-fresh{color:var(--ok);background:var(--ok-bg)}
-.days-mid{color:var(--warn);background:var(--warn-bg)}
-.days-old{color:var(--bad);background:var(--bad-bg)}
+/* badges/chips */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.b-ok{color:var(--ok);background:var(--ok-bg)}
+.b-warn{color:var(--warn);background:var(--warn-bg)}
+.b-bad{color:var(--bad);background:var(--bad-bg)}
+.b-info{color:var(--info);background:var(--info-bg)}
+.b-open{color:var(--open);background:var(--open-bg)}
 
-/* function / type chips */
 .fn-chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;background:#FEE9D1;color:#9A3412}
 [data-theme="dark"] .fn-chip{background:#2D1B09;color:#FB923C}
 .type-chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;background:#D1FAE5;color:#065F46}
 [data-theme="dark"] .type-chip{background:#052E16;color:#34D399}
 
+.pri-High{color:var(--bad);background:var(--bad-bg)}
+.pri-Medium{color:var(--warn);background:var(--warn-bg)}
+.pri-Low{color:var(--muted);background:var(--open-bg)}
+
 /* people chips */
 .people-wrap{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .pchip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 4px;border-radius:999px;font-size:12px;font-weight:650;white-space:nowrap;border:1.5px solid transparent}
 .pchip .av{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
+.pchip.inactive{opacity:.5;text-decoration:line-through}
 
-/* status select */
-.status-sel{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-size:12.5px;font-weight:650;border:none;cursor:pointer;-webkit-appearance:none;appearance:none}
-.s-inprogress{background:var(--info-bg);color:var(--info)}
-.s-delayed{background:#3D0000;color:#F87171;font-weight:750}
-.s-notstarted{background:var(--bad-bg);color:var(--bad)}
-.s-open{background:var(--open-bg);color:var(--open)}
-.s-done{background:var(--ok-bg);color:var(--ok)}
-.s-blocked{background:var(--warn-bg);color:var(--warn)}
+/* stage select */
+.stage-sel{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-size:12.5px;font-weight:650;border:none;cursor:pointer;-webkit-appearance:none;appearance:none}
 
 /* === Modal === */
 .overlay{position:fixed;inset:0;background:rgba(10,12,20,.45);backdrop-filter:blur(3px);z-index:40;display:none;place-items:center;padding:16px}
@@ -135,13 +147,34 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
 .field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
 .field label span{text-transform:none;font-weight:400;color:var(--muted)}
 
+/* drawer (task detail) */
+.drawer-overlay{position:fixed;inset:0;background:rgba(10,12,20,.4);z-index:45;display:none}
+.drawer-overlay.open{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);background:var(--surface);box-shadow:-8px 0 30px rgba(0,0,0,.2);z-index:46;transform:translateX(100%);transition:transform .18s ease;overflow-y:auto}
+.drawer-overlay.open .drawer{transform:translateX(0)}
+.drawer .dh{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:10px}
+.drawer .db{padding:16px 20px;display:flex;flex-direction:column;gap:16px}
+.dsec h4{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;font-weight:700}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;font-size:12.5px}
+.dgrid .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.dgrid .val{margin-top:2px}
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{position:relative;padding:0 0 14px 20px;border-left:2px solid var(--line)}
+.tl-item:last-child{border-color:transparent;padding-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-5px;top:2px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.tl-item .tl-t{font-size:11.5px;color:var(--muted)}
+.tl-item .tl-d{font-size:13px;margin-top:2px}
+.tl-src{font-size:10.5px;padding:1px 7px;border-radius:999px;background:var(--surface2);color:var(--muted);margin-left:6px}
+.tg-msg{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;margin-bottom:6px}
+.tg-msg.out{background:var(--accent-soft)}
+.tg-msg.in{background:var(--ok-bg)}
+.tg-msg .tg-meta{font-size:10.5px;color:var(--muted);margin-top:4px}
+
 /* people picker */
 .people-picker{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface2);display:flex;flex-direction:column;gap:8px}
 .people-picker .selected-wrap{display:flex;flex-wrap:wrap;gap:5px;min-height:28px}
 .people-picker .pchip .rm{opacity:.6;font-size:13px;line-height:1;padding:0 0 0 4px;border-radius:50%;cursor:pointer}
 .people-picker .pchip .rm:hover{opacity:1}
-.people-input-row{display:flex;gap:6px}
-.people-input-row input{flex:1;border-radius:6px;padding:6px 9px}
 .people-options{display:flex;flex-wrap:wrap;gap:5px}
 .po{cursor:pointer;opacity:.7;transition:opacity .15s}
 .po:hover{opacity:1}
@@ -152,40 +185,37 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
 .manage-people h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--line)}
 .person-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line)}
 .person-row:last-child{border-bottom:none}
+.person-row.inactive{opacity:.55}
 .color-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0}
 .color-swatch.active{border-color:var(--accent)}
 
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 18px;border-radius:9px;font-weight:600;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;transition:opacity .2s;pointer-events:none}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 18px;border-radius:9px;font-weight:600;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw;text-align:center}
 .toast.show{opacity:1}
-/* ── Import from notes ── */
-.import-modal{width:min(860px,100%);max-height:92vh}
+
+/* CSV import modal */
+.import-modal{width:min(920px,100%);max-height:92vh}
 .import-step{display:none;flex-direction:column;gap:14px;padding:20px}
 .import-step.active{display:flex}
-.transcript-box{width:100%;min-height:180px;max-height:280px;resize:vertical;font-size:13px;line-height:1.6;border-radius:8px;padding:12px;background:var(--surface2);border:1px solid var(--line)}
-.ai-thinking{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:50px 20px;text-align:center;color:var(--muted)}
-.ai-thinking .spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ai-thinking .msg{font-size:13px;animation:pulse 1.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
-.review-list{display:flex;flex-direction:column;gap:10px;max-height:480px;overflow-y:auto;padding-right:4px}
-.review-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface2)}
-.review-card.excluded{opacity:.45;border-style:dashed}
-.review-card .rc-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--line)}
-.review-card .rc-head label{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:650;flex:1;font-size:13px}
-.review-card .rc-head input[type=checkbox]{width:16px;height:16px;cursor:pointer;flex-shrink:0}
-.review-card .rc-body{padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.review-card .rc-body .full{grid-column:1/3}
-.review-card .field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:3px}
-.review-card .field input,.review-card .field select,.review-card .field textarea{font-size:12.5px;padding:5px 8px}
-.review-card .field textarea{min-height:52px;resize:vertical}
-.rc-type-ap{color:#15803D;background:#DCFCE7;border:1px solid #BBF7D0;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700}
-.rc-type-ld{color:#7C3AED;background:#EDE9FE;border:1px solid #DDD6FE;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700}
-[data-theme="dark"] .rc-type-ap{color:#4ADE80;background:#052E16;border-color:#14532D}
-[data-theme="dark"] .rc-type-ld{color:#C4B5FD;background:#2E1065;border-color:#4C1D95}
-.import-summary{background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px}
-.import-summary .sum-num{font-size:22px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
-.source-badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:3px 12px 3px 6px;font-size:12px;font-weight:600}
-.source-badge .sb-dot{width:8px;height:8px;border-radius:50%;background:#1B8A5A}
+.drop-zone{border:2px dashed var(--line);border-radius:10px;padding:30px 20px;text-align:center;color:var(--muted);cursor:pointer}
+.drop-zone:hover{border-color:var(--accent);color:var(--accent)}
+.csv-summary{display:flex;gap:10px;flex-wrap:wrap}
+.csv-summary .cs-tile{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 14px;text-align:center;min-width:90px}
+.csv-summary .cs-tile .v{font-size:18px;font-weight:800}
+.csv-summary .cs-tile .l{font-size:11px;color:var(--muted)}
+.csv-table-wrap{max-height:380px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.csv-table{width:100%;border-collapse:collapse;font-size:12px}
+.csv-table th{position:sticky;top:0;background:var(--surface2);padding:6px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.csv-table td{padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.csv-row-new{background:var(--ok-bg)}
+.csv-row-update{background:var(--info-bg)}
+.csv-row-invalid{background:var(--bad-bg)}
+.csv-row-duplicate{background:var(--warn-bg)}
+.import-step .mf{border:none;padding:0;justify-content:flex-end}
+
+@media (max-width:640px){
+  .dgrid{grid-template-columns:1fr}
+  .drawer{width:100%}
+}
 </style>
 </head>
 <body>
@@ -193,15 +223,22 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
 <div class="topbar">
   <div class="logo"><span class="logo-mark">✦</span>Action Tracker</div>
   <div class="spacer"></div>
-  <button class="btn sm" id="managePeopleBtn">👤 Manage people</button>
+  <button class="btn sm" id="managePeopleBtn">👤 Owners</button>
+  <button class="btn sm" id="csvImportBtn">⇧ Import CSV</button>
+  <button class="btn sm" id="csvExportBtn">⇩ Export CSV</button>
   <button class="btn" id="importBtn" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent)">✦ Import from notes</button>
-  <button class="btn primary" id="addItemBtn">+ Add action item</button>
+  <button class="btn primary" id="addItemBtn">+ New action</button>
   <button class="iconbtn" id="themeBtn" title="Toggle dark/light">◐</button>
 </div>
 
 <div class="wrapper">
-  <!-- Stats -->
-  <div class="stats" id="statsBar"></div>
+  <!-- Dashboard -->
+  <div class="dash" id="dashBar"></div>
+  <details class="owner-summary" id="ownerSummary" open>
+    <summary>Workload by owner</summary>
+    <table><thead><tr><th>Owner</th><th style="text-align:right">Open</th><th style="text-align:right">Overdue</th><th style="text-align:right">Due today</th><th style="text-align:right">Waiting on them</th></tr></thead>
+    <tbody id="ownerSummaryBody"></tbody></table>
+  </details>
 
   <!-- Toolbar -->
   <div class="toolbar">
@@ -209,11 +246,24 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
       <button class="vtbtn active" data-view="list">☰ List</button>
       <button class="vtbtn" data-view="kanban">▦ Kanban</button>
     </div>
-    <input type="search" id="searchBox" placeholder="Search action items…">
-    <select id="fltStatus"><option value="">All statuses</option><option>In Progress</option><option>In Progress - Delayed</option><option>Not Started</option><option>Open</option><option>Done</option><option>Blocked</option></select>
-    <select id="fltPerson"><option value="">All people</option></select>
-    <select id="fltFunction"><option value="">All functions</option><option>Performance Marketing</option><option>Retention Marketing</option><option>New Channels</option><option>Help from Other Departments</option></select>
-    <select id="fltType"><option value="">All types</option><option>Action Pointer</option><option>Decision</option><option>Risk</option><option>FYI</option></select>
+    <input type="search" id="searchBox" placeholder="Search…">
+    <select id="fltStage"><option value="">All stages</option></select>
+    <select id="fltPerson"><option value="">All owners</option></select>
+    <select id="fltPriority"><option value="">All priorities</option><option>High</option><option>Medium</option><option>Low</option></select>
+    <select id="fltDue">
+      <option value="">Any due date</option>
+      <option value="overdue">Overdue</option>
+      <option value="today">Due today</option>
+      <option value="tomorrow">Due tomorrow</option>
+      <option value="week">Due this week</option>
+    </select>
+    <select id="fltFollowup">
+      <option value="">Any follow-up</option>
+      <option value="today">Follow-up today</option>
+      <option value="overdue">Follow-up overdue</option>
+      <option value="week">Follow-up this week</option>
+    </select>
+    <select id="fltTelegram"><option value="">Any Telegram status</option><option>None</option><option>Sent</option><option>Waiting for Response</option><option>Response Received</option></select>
     <button class="btn sm" id="clearFlt">Clear</button>
     <span id="rowCount" style="margin-left:auto;font-size:12px;color:var(--muted)"></span>
   </div>
@@ -223,15 +273,14 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
     <table id="mainTable">
       <thead>
         <tr>
-          <th data-col="dateOfDisc">Date of Disc <span class="sort-ind">↕</span></th>
-          <th data-col="daysPassed">Days Elapsed <span class="sort-ind">↕</span></th>
-          <th data-col="function">Function <span class="sort-ind">↕</span></th>
-          <th data-col="type">Type <span class="sort-ind">↕</span></th>
-          <th data-col="actionItem">Action Item <span class="sort-ind">↕</span></th>
-          <th data-col="stakeholders">Stakeholders</th>
-          <th data-col="nextStep">Next Step Owner</th>
-          <th data-col="status">Status <span class="sort-ind">↕</span></th>
-          <th data-col="remarks">Expected Timeline / Remarks</th>
+          <th data-col="actionItem">Task <span class="sort-ind">↕</span></th>
+          <th data-col="owner">Owner <span class="sort-ind">↕</span></th>
+          <th data-col="stage">Stage <span class="sort-ind">↕</span></th>
+          <th data-col="priority">Priority <span class="sort-ind">↕</span></th>
+          <th data-col="dueDate">Due <span class="sort-ind">↕</span></th>
+          <th data-col="followUpDate">Follow-up <span class="sort-ind">↕</span></th>
+          <th data-col="telegram">Telegram</th>
+          <th data-col="updatedAt">Updated <span class="sort-ind">↕</span></th>
           <th></th>
         </tr>
       </thead>
@@ -246,7 +295,7 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
 <!-- Add/Edit item modal -->
 <div class="overlay" id="itemOverlay">
   <div class="modal" id="itemModal">
-    <div class="mh" id="itemModalTitle">Add action item</div>
+    <div class="mh" id="itemModalTitle">New action</div>
     <div class="mb" id="itemModalBody"></div>
     <div class="mf">
       <button class="btn" id="itemCancel">Cancel</button>
@@ -255,27 +304,62 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
   </div>
 </div>
 
+<!-- Task detail drawer -->
+<div class="drawer-overlay" id="drawerOverlay">
+  <div class="drawer" id="drawer"></div>
+</div>
+
 <!-- Manage people modal -->
 <div class="overlay" id="peopleOverlay">
   <div class="modal">
-    <div class="mh">👤 Manage people <button class="btn sm" id="addPersonBtn" style="margin-left:auto">+ Add person</button></div>
+    <div class="mh">👤 Owners <button class="btn sm" id="addPersonBtn" style="margin-left:auto">+ Add person</button></div>
     <div class="mb" id="peoplePanelBody"></div>
     <div class="mf"><button class="btn primary" id="peopleClose">Done</button></div>
   </div>
 </div>
 
-<!-- Import from meeting notes modal -->
+<!-- CSV import modal -->
+<div class="overlay" id="csvOverlay">
+  <div class="modal import-modal">
+    <div class="mh" style="justify-content:space-between">
+      <span>⇧ Import CSV</span>
+      <button class="iconbtn" id="csvClose">✕</button>
+    </div>
+    <div class="import-step active" id="csvStep1">
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">
+        Upload a CSV of action items. Rows with an existing Task ID update that task; rows without one (or with an
+        unrecognized ID) create a new task. Nothing is saved until you confirm the preview.
+      </div>
+      <div class="drop-zone" id="csvDropZone">
+        <input type="file" id="csvFileInput" accept=".csv" style="display:none">
+        Click to choose a CSV file, or drag one here
+      </div>
+      <div>
+        <button class="btn sm" id="csvTemplateBtn">⇩ Download sample CSV template</button>
+      </div>
+    </div>
+    <div class="import-step" id="csvStep2">
+      <div class="csv-summary" id="csvSummary"></div>
+      <div style="font-size:12px;color:var(--muted)">Review below. Only valid rows (new or update) will be imported.</div>
+      <div class="csv-table-wrap"><table class="csv-table" id="csvPreviewTable"></table></div>
+      <div class="mf">
+        <button class="btn" id="csvBack">← Back</button>
+        <button class="btn primary" id="csvConfirm">Import valid rows</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Import from meeting notes modal (unchanged legacy feature) -->
 <div class="overlay" id="importOverlay">
   <div class="modal import-modal">
     <div class="mh" style="justify-content:space-between;align-items:center">
       <span>✦ Import from meeting notes</span>
       <div style="display:flex;align-items:center;gap:8px">
-        <span class="source-badge"><span class="sb-dot"></span>Otter.ai · Google Meet · Any transcript</span>
+        <span class="source-badge">Otter.ai · Google Meet · Any transcript</span>
         <button class="iconbtn" id="importClose">✕</button>
       </div>
     </div>
-
-    <!-- Step 1: paste -->
     <div class="import-step active" id="importStep1">
       <div style="font-size:13px;color:var(--muted);line-height:1.6">
         Paste your meeting transcript or notes below — from <b>Otter.ai</b>, Google Meet, Zoom, or any source.
@@ -293,43 +377,31 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
       </div>
       <div class="field">
         <label>Paste transcript or notes</label>
-        <textarea class="transcript-box" id="transcriptBox" placeholder="Paste your Otter.ai transcript, meeting summary, or any notes here…&#10;&#10;Example:&#10;Shashank: We need to follow up on the PHC creatives by Friday.&#10;Raeesa: I'll handle the donor acquisition analysis — target next week.&#10;Sumeet: Let's track the IP tracking fix, it needs testing from the product team."></textarea>
+        <textarea style="min-height:180px;max-height:280px;resize:vertical" id="transcriptBox" placeholder="Paste your Otter.ai transcript, meeting summary, or any notes here…"></textarea>
       </div>
       <div class="mf" style="border:none;padding:0">
         <button class="btn" id="importClose2">Cancel</button>
         <button class="btn primary" id="extractBtn">✦ Extract action items</button>
       </div>
     </div>
-
-    <!-- Step 2: AI thinking -->
     <div class="import-step" id="importStep2">
-      <div class="ai-thinking">
-        <div class="spinner"></div>
-        <div class="msg" id="thinkingMsg">Reading transcript…</div>
-        <div style="font-size:12px;margin-top:4px">Claude is identifying action items and matching names to your team</div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:50px 20px;text-align:center;color:var(--muted)">
+        <div id="thinkingMsg">Reading transcript…</div>
       </div>
     </div>
-
-    <!-- Step 3: review extracted items -->
     <div class="import-step" id="importStep3">
-      <div class="import-summary" id="importSummary"></div>
-      <div style="font-size:12.5px;color:var(--muted)">
-        Review each item below. Tick/untick to include or exclude. Edit any field before importing.
-      </div>
-      <div class="review-list" id="reviewList"></div>
+      <div id="importSummary"></div>
+      <div class="review-list" id="reviewList" style="display:flex;flex-direction:column;gap:10px;max-height:440px;overflow-y:auto"></div>
       <div class="mf" style="border:none;padding:0">
         <button class="btn" id="backToStep1">← Back</button>
         <button class="btn" id="toggleAllBtn">Deselect all</button>
         <button class="btn primary" id="confirmImportBtn">Add selected to tracker</button>
       </div>
     </div>
-
-    <!-- Step 4: done -->
     <div class="import-step" id="importStep4">
-      <div class="ai-thinking" style="padding:40px 20px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 20px">
         <div style="font-size:40px">✅</div>
-        <div style="font-size:15px;font-weight:700;color:var(--ink)" id="doneMsg">Action items added!</div>
-        <div style="font-size:13px;color:var(--muted)">Your tracker has been updated.</div>
+        <div style="font-size:15px;font-weight:700" id="doneMsg">Action items added!</div>
         <button class="btn primary" id="importDoneBtn" style="margin-top:8px">Done</button>
       </div>
     </div>
@@ -338,1071 +410,6 @@ td.remarks-cell{min-width:180px;font-size:12.5px;color:var(--muted)}
 
 <div class="toast" id="toast"></div>
 
-<script>
-'use strict';
-
-/* ─── Person palette ─────────────────────────────────────────────── */
-const PALETTE = [
-  '#E07B54','#5B8CDB','#7AC08A','#C47AC0','#D4A843','#56A8B5','#D46E6E','#8A7AC4',
-  '#4DB38C','#C49A56','#7A9EC4','#C47AA0','#6EC49A','#A07AC4','#C4A07A','#4D9BC4'
-];
-
-/* ─── Defaults ───────────────────────────────────────────────────── */
-const DEFAULT_PEOPLE = [
-  {id:'q1',  name:'Akshay K',                 color:'#E07B54', email:'akshay.khonde@impactguru.com'},
-  {id:'q2',  name:'Kripa',                    color:'#5B8CDB', email:'kripa.doshi@impactguru.com'},
-  {id:'q3',  name:'Omkar',                    color:'#7AC08A', email:'omkar.chavan@impactguru.com'},
-  {id:'q4',  name:'Raeesa',                   color:'#C47AC0', email:'raeesa@impactguru.com'},
-  {id:'q5',  name:'Rajas',                    color:'#D4A843', email:'rajas.deosthalee@impactguru.com'},
-  {id:'q6',  name:'Sakshi',                   color:'#56A8B5', email:'sakshi.sukheja@impactguru.com'},
-  {id:'q7',  name:'Sumeet T',                 color:'#D46E6E', email:'sumeet.tripathy@impactguru.com'},
-  {id:'q8',  name:'Karishma Sarvesh Shirsat', color:'#8A7AC4', email:'karishma.shirsat@impactguru.com'},
-  {id:'q9',  name:'Anmol Singh Panesar',      color:'#4DB38C', email:'anmol.panesar@impactguru.com'},
-  {id:'q10', name:'Bharadwaj Kanamarlapudi',  color:'#C49A56', email:'bharadwaj@impactguru.com'},
-  {id:'q11', name:'Khushboo Jain',            color:'#7A9EC4', email:'khushboo.jain@impactguru.com'},
-  {id:'q12', name:'Ruchika Mehra',            color:'#C47AA0', email:'ruchika.mehra@impactguru.com'},
-  {id:'q13', name:'Shashank Mogaveera',       color:'#6EC49A', email:'shashank.mogaveera@impactguru.com'},
-  {id:'q14', name:'Madhav',                   color:'#A07AC4', email:'madhav.bhardwaj@impactguru.com'},
-  {id:'q15', name:'Tanisha',                  color:'#C4A07A', email:'tanisha.bhave@impactguru.com'},
-  {id:'q16', name:'Shubham Gaud',             color:'#4D9BC4', email:'shubham.gaud@impactguru.com'},
-  {id:'q17', name:'Sajan Biswas',             color:'#D48A6E', email:'sajan.biswas@impactguru.com'},
-  {id:'q18', name:'Dhruvi Dagli',             color:'#6EA0C4', email:'dagli.dhruvi@impactguru.com'},
-  {id:'q19', name:'Shubham Yadav',            color:'#A8C46E', email:'shubham.yadav@impactguru.com'},
-  {id:'q20', name:'Sonali',                   color:'#C46EA0', email:'sonali.sahu@impactguru.com'},
-];
-
-const STATUS_CLASSES = {
-  'In Progress':'s-inprogress','In Progress - Delayed':'s-delayed','Not Started':'s-notstarted','Open':'s-open','Done':'s-done','Blocked':'s-blocked'
-};
-
-const SEED_VERSION = 3;
-
-/* ─── State ──────────────────────────────────────────────────────── */
-let state = null;
-async function loadState(){
-  try{
-    const res = await fetch('/api/state');
-    if(!res.ok) return null;
-    const saved = await res.json();
-    if(saved && (saved.version||1) >= SEED_VERSION) return saved;
-    // no saved state, or a stale seed version → fall through to re-seed
-  }catch(e){}
-  return null;
-}
-async function saveState(){
-  try{
-    await fetch('/api/state', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(state)
-    });
-  }catch(e){}
-}
-
-function seed(){
-  const T = todayISO();
-  const items = [
-    /* ── Performance Marketing ── */
-    {id:'i1', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Add ROAS to the email and WhatsApp reporting slide',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i2', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Add domestic/international split to reporting slide',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: KJ'},
-    {id:'i45', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Report ROAS of intl and dom separately',
-     stakeholders:['p6'], nextStep:['p5'], status:'Not Started', remarks:'Directive: KJ'},
-    {id:'i3', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Improve landing page ROI (raise story-page trust factor from 6 to 8) and revamp the landing page',
-     stakeholders:['p15'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ, KJ, VK'},
-    {id:'i4', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Define end goal for the multi-patient experiment (IGKart) before proceeding',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i5', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Obtain industry benchmark for hold-through rate and report back',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i6', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Review Hardik and Paramjit data; report back on hold-through rate and CTR',
-     stakeholders:['p6'], nextStep:['p5'], status:'Not Started', remarks:'Directive: KJ, VK'},
-    {id:'i7', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Run a video-only test to isolate hook-through and hook rate impact',
-     stakeholders:['p6'], nextStep:['p2'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i8', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Deep-dive domestic ROAS, April-June comparison, with strategic to-dos',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i9', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Recheck whether CAC rose in line with CPM, Q1 vs Q4',
-     stakeholders:['p6'], nextStep:['p5'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i10', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Share the cause-based ad (created for Sandeep) with KJ',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: KJ'},
-    {id:'i11', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Check non-ImpactGuru domain ad sets to improve hold-through/hook rate',
-     stakeholders:['p6'], nextStep:['p4'], status:'Not Started', remarks:'Directive: Sandeep'},
-    {id:'i12', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Prioritise the first 3 seconds of Meta ad creatives',
-     stakeholders:['p6'], nextStep:['p2'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i13', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Test the Flexi-gem experience',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i14', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Define specific strategies for controlling costs',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i15', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Assess time spent on revamps versus fresh cases and report back',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i16', dateOfDisc:T, function:'Performance Marketing', type:'Action Pointer',
-     actionItem:'Keep Impactkart (IGKart) scope limited',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
-
-    /* ── Retention Marketing ── */
-    {id:'i17', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Add push notification data to the next quarterly review',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: KJ'},
-    {id:'i18', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Launch app push notifications',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i19', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Launch Chrome notifications',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i20', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Reduce dependency on WhatsApp (pricing set to ~2x) by diversifying into RCS, SMS, in-app, and web push',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i21', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Build clear cost segregation and an LTV/repeat-donor ROAS view',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i22', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Define end-stage goal for the donor app',
-     stakeholders:['p12'], nextStep:['p6'], status:'Not Started', remarks:'Directive: VK, Pankaj'},
-    {id:'i23', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Explore donor engagement approach',
-     stakeholders:['p12'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i24', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Use video-engagement spark line data to guide revamp decisions',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: VK'},
-    {id:'i25', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Further optimise the WhatsApp channel and define the donor app investment plan',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: PJ'},
-
-    /* ── New Channels ── */
-    {id:'i26', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Restart YouTube push (creatives and videos); pursue agency account for YT Performance Max',
-     stakeholders:['p6'], nextStep:['p4'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i27', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Push Google for faster ad account approvals',
-     stakeholders:['p6'], nextStep:['p4'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i28', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Test Snapchat',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: AK'},
-    {id:'i29', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Explore LinkedIn and news/publisher-style channels; assign an owner',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i30', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Run the checkout charity experiment',
-     stakeholders:['p17'], nextStep:['p16'], status:'Not Started', remarks:'Directive: Bhardwaj'},
-    {id:'i31', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Launch native ad pilots (MGID, Taboola, Criteo/Tyroo, Outbrain/Tyroo, RTB House) for reach and remarketing',
-     stakeholders:['p6'], nextStep:['p4'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i32', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Launch influencer pilot (awareness/engagement, alternate video starts); sourcing creators',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: Sandeep, KJ'},
-    {id:'i33', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Launch advertorials pilot',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i34', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Launch Quora content marketing pilot',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i35', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Launch Reddit content marketing pilot',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i36', dateOfDisc:T, function:'New Channels', type:'Action Pointer',
-     actionItem:'Check with the BW team on their capacity to develop new channels',
-     stakeholders:['p6'], nextStep:['p6'], status:'Not Started', remarks:'Directive: PJ'},
-
-    /* ── Help from Other Departments ── */
-    {id:'i37', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
-     actionItem:'Link creative-team incentives to hook and hold rate performance; publish data',
-     stakeholders:['p6'], nextStep:['p2'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i38', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
-     actionItem:'Create guides, videos, and SOPs for BD and hospital POC',
-     stakeholders:['p6'], nextStep:['p7'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i39', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
-     actionItem:'Add PDF to the BD app across BD flows',
-     stakeholders:['p18','p19'], nextStep:['p15'], status:'Not Started', remarks:'Directive: Tanvika'},
-    {id:'i40', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
-     actionItem:'Research retention practices at Zepto and similar companies; arrange an interview',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i41', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
-     actionItem:'Audit wasteful retention spend with external experts',
-     stakeholders:['p6'], nextStep:['p3'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i42', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
-     actionItem:'Hire 3-4 new field agents',
-     stakeholders:['p18','p19'], nextStep:['p20'], status:'Not Started', remarks:'Directive: PJ'},
-    {id:'i43', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
-     actionItem:'Build domestic and international event calendar (2 months ahead); share with BD, Creative, Marketing',
-     stakeholders:['p6'], nextStep:['p7'], status:'Not Started', remarks:'Directive: KJ'},
-    {id:'i44', dateOfDisc:T, function:'Help from Other Departments', type:'Action Pointer',
-     actionItem:'Sort pending updates and settlements',
-     stakeholders:['p12'], nextStep:['p21'], status:'Not Started', remarks:'Directive: Ankita'},
-
-    /* ── Added 21 Jul 2026 ── */
-    {id:'i46', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Send Sukvinder/Paramjeet case to Punjab Flood donors',
-     stakeholders:['p3'], nextStep:[], status:'In Progress', remarks:''},
-    {id:'i47', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Razorpay SPC test',
-     stakeholders:['p3'], nextStep:[], status:'In Progress', remarks:'', lastFollowUp:'2026-07-21'},
-    {id:'i48', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'2 Segments : For 2 weeks - full journey to be designed and appeal will be in 3rd or 4th msg',
-     stakeholders:['p14'], nextStep:['p3'], status:'In Progress', remarks:''},
-    {id:'i49', dateOfDisc:T, function:'Retention Marketing', type:'Action Pointer',
-     actionItem:'Start emails with a Positive messaging and health update and then appeal. Since open rates are better over there',
-     stakeholders:['p14','p1'], nextStep:['p3'], status:'In Progress', remarks:''},
-  ];
-  return { version:SEED_VERSION, people: DEFAULT_PEOPLE, items };
-}
-
-const uid = () => 'x' + Math.random().toString(36).slice(2,9);
-const todayISO = () => new Date().toISOString().slice(0,10);
-const daysPassed = iso => {
-  if(!iso) return 0;
-  return Math.max(0, Math.floor((Date.now() - new Date(iso+'T00:00:00').getTime()) / 86400000));
-};
-const fmtDate = iso => iso ? new Date(iso+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const personById = id => state.people.find(p => p.id === id);
-
-/* ─── People chips ───────────────────────────────────────────────── */
-function initials(name){ return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
-function personChipHTML(p, small=false){
-  if(!p) return '';
-  const sz = small ? 16 : 18;
-  return `<span class="pchip" style="background:${p.color}22;color:${p.color};border-color:${p.color}44">
-    <span class="av" style="background:${p.color};width:${sz}px;height:${sz}px;font-size:${small?8:9}px">${esc(initials(p.name))}</span>
-    ${esc(p.name)}
-  </span>`;
-}
-
-/* ─── Days badge ─────────────────────────────────────────────────── */
-function daysBadge(n){
-  const cls = n <= 7 ? 'days-fresh' : n <= 21 ? 'days-mid' : 'days-old';
-  const label = n === 0 ? 'Today' : n === 1 ? '1 day' : `${n} days`;
-  return `<span class="days-badge ${cls}">${label}</span>`;
-}
-
-/* ─── Status HTML ────────────────────────────────────────────────── */
-function statusBadge(s){
-  const cls = STATUS_CLASSES[s] || 's-open';
-  const dot = {'In Progress':'●','In Progress - Delayed':'▲','Not Started':'○','Open':'◆','Done':'✔','Blocked':'✖'}[s] || '●';
-  return `<span class="status-sel ${cls}">${dot} ${esc(s)}</span>`;
-}
-
-/* ─── Follow-up email ────────────────────────────────────────────── */
-const FOLLOWUP_CC = 'sumeet.tripathy@impactguru.com';
-
-function followUpComposeUrl(r){
-  const assigned = [...(r.stakeholders||[]), ...(r.nextStep||[])].map(id => personById(id)).filter(Boolean);
-  const to = [...new Set(assigned.map(p => p.email).filter(Boolean))].join(',');
-  const dp = daysPassed(r.dateOfDisc);
-  const subject = `Follow-up: ${r.actionItem.length > 60 ? r.actionItem.slice(0,57)+'…' : r.actionItem}`;
-  const body = [
-    `Hi,`,
-    ``,
-    `Following up on this action item:`,
-    `"${r.actionItem}"`,
-    ``,
-    `Function: ${r.function || '—'}`,
-    `Status: ${r.status}`,
-    `Raised on: ${fmtDate(r.dateOfDisc)} (${dp} day${dp===1?'':'s'} ago)`,
-    r.remarks ? `Remarks: ${r.remarks}` : null,
-    ``,
-    `Could you share a quick update on where this stands?`,
-    ``,
-    `Thanks!`
-  ].filter(x => x !== null).join('\n');
-  const params = new URLSearchParams({ view:'cm', fs:'1', to, cc: FOLLOWUP_CC, su: subject, body });
-  return `https://mail.google.com/mail/?${params.toString()}`;
-}
-
-function sendFollowUp(id){
-  const r = state.items.find(x => x.id === id);
-  if(!r) return;
-  const assigned = [...(r.stakeholders||[]), ...(r.nextStep||[])].map(pid => personById(pid)).filter(Boolean);
-  const hasEmail = assigned.some(p => p.email);
-  window.open(followUpComposeUrl(r), '_blank', 'noopener');
-  r.lastFollowUp = todayISO();
-  saveState(); render();
-  toast(hasEmail ? 'Gmail compose opened in a new tab — logged as followed up today' : 'Gmail compose opened (no emails on file — add them in Manage People) — logged as followed up today');
-}
-
-function followUpNote(r){
-  return r.lastFollowUp ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">✉ Followed up ${fmtDate(r.lastFollowUp)}</div>` : '';
-}
-
-/* ─── Telegram follow-up ─────────────────────────────────────────── */
-function followUpTelegramText(r){
-  const dp = daysPassed(r.dateOfDisc);
-  return [
-    `Follow-up on action item:`,
-    `"${r.actionItem}"`,
-    ``,
-    `Function: ${r.function || '—'}`,
-    `Status: ${r.status}`,
-    `Raised on: ${fmtDate(r.dateOfDisc)} (${dp} day${dp===1?'':'s'} ago)`,
-    r.remarks ? `Remarks: ${r.remarks}` : null,
-    ``,
-    `Could you share a quick update on where this stands?`
-  ].filter(x => x !== null).join('\n');
-}
-
-async function sendTelegramFollowUp(id){
-  const r = state.items.find(x => x.id === id);
-  if(!r) return;
-  try{
-    const res = await fetch('/api/telegram/send-followup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ itemId: id, text: followUpTelegramText(r) })
-    });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error || 'Failed to send');
-    r.lastFollowUp = todayISO();
-    render();
-    if(data.sentTo.length && data.skipped.length){
-      toast(`Sent on Telegram to ${data.sentTo.join(', ')}. Not connected yet: ${data.skipped.join(', ')}`);
-    } else if(data.sentTo.length){
-      toast(`Sent on Telegram to ${data.sentTo.join(', ')}`);
-    } else {
-      toast('No one on this item has connected Telegram yet — get their link from Manage People');
-    }
-  }catch(e){
-    toast('Telegram send failed: ' + e.message);
-  }
-}
-
-/* ─── View mode ──────────────────────────────────────────────────── */
-let viewMode = 'list'; // 'list' | 'kanban'
-const KANBAN_STATUSES = ['Not Started','In Progress','In Progress - Delayed','Open','Done','Blocked'];
-
-/* ─── Sorting ────────────────────────────────────────────────────── */
-let sortKey = 'dateOfDisc', sortDir = -1; // newest first
-function sortedFiltered(){
-  const q = document.getElementById('searchBox').value.trim().toLowerCase();
-  const fStatus = document.getElementById('fltStatus').value;
-  const fPerson = document.getElementById('fltPerson').value;
-  const fFunc = document.getElementById('fltFunction').value;
-  const fType = document.getElementById('fltType').value;
-  let rows = state.items.filter(r =>
-    (!q || [r.actionItem,r.remarks,r.function,r.type].join(' ').toLowerCase().includes(q)
-       || (r.stakeholders||[]).some(id => personById(id)?.name.toLowerCase().includes(q))
-       || (r.nextStep||[]).some(id => personById(id)?.name.toLowerCase().includes(q))
-    )
-    && (!fStatus || r.status === fStatus)
-    && (!fPerson || (r.stakeholders||[]).includes(fPerson) || (r.nextStep||[]).includes(fPerson))
-    && (!fFunc || r.function === fFunc)
-    && (!fType || r.type === fType)
-  );
-  rows.sort((a,b) => {
-    let va, vb;
-    if(sortKey==='daysPassed'){ va=daysPassed(a.dateOfDisc); vb=daysPassed(b.dateOfDisc); }
-    else { va=a[sortKey]||''; vb=b[sortKey]||''; }
-    return (va<vb?-1:va>vb?1:0)*sortDir;
-  });
-  return rows;
-}
-
-function updateRowCount(rows){
-  document.getElementById('rowCount').textContent = rows.length ? `${rows.length} of ${state.items.length} items` : '0 items';
-}
-
-/* ─── Render table ───────────────────────────────────────────────── */
-function renderTable(){
-  const rows = sortedFiltered();
-  updateRowCount(rows);
-  const tbody = document.getElementById('tableBody');
-  if(!rows.length){
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted)">No action items match the current filters.</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map(r => {
-    const dp = daysPassed(r.dateOfDisc);
-    const stake = (r.stakeholders||[]).map(id => personById(id)).filter(Boolean);
-    const next  = (r.nextStep||[]).map(id => personById(id)).filter(Boolean);
-    return `<tr>
-      <td class="date-cell">${fmtDate(r.dateOfDisc)}</td>
-      <td class="days-cell">${daysBadge(dp)}</td>
-      <td><span class="fn-chip">${esc(r.function||'—')}</span></td>
-      <td><span class="type-chip">${esc(r.type||'—')}</span></td>
-      <td class="action-cell">${esc(r.actionItem)}</td>
-      <td><div class="people-wrap">${stake.map(p=>personChipHTML(p)).join('')||'<span style="color:var(--muted)">—</span>'}</div></td>
-      <td><div class="people-wrap">${next.map(p=>personChipHTML(p)).join('')||'<span style="color:var(--muted)">—</span>'}</div></td>
-      <td class="status-cell">${statusBadge(r.status)}</td>
-      <td class="remarks-cell">${esc(r.remarks||'—')}${followUpNote(r)}</td>
-      <td><div style="display:flex;gap:4px">
-        <button class="btn sm" data-followup="${r.id}" title="Send follow-up email">✉</button>
-        <button class="btn sm" data-tgfollowup="${r.id}" title="Send follow-up on Telegram">✈</button>
-        <button class="btn sm" data-edit="${r.id}">Edit</button>
-        <button class="btn sm" data-del="${r.id}" style="color:var(--bad)">✕</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-
-  tbody.querySelectorAll('[data-followup]').forEach(b => b.onclick = () => sendFollowUp(b.dataset.followup));
-  tbody.querySelectorAll('[data-tgfollowup]').forEach(b => b.onclick = () => sendTelegramFollowUp(b.dataset.tgfollowup));
-  tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openItemModal(b.dataset.edit));
-  tbody.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
-    if(confirm('Delete this action item?')){
-      state.items = state.items.filter(r => r.id !== b.dataset.del);
-      saveState(); render();
-      toast('Action item deleted');
-    }
-  });
-  renderSortIndicators();
-}
-
-function renderSortIndicators(){
-  document.querySelectorAll('thead th').forEach(th => {
-    th.classList.toggle('sorted', th.dataset.col === sortKey);
-    const ind = th.querySelector('.sort-ind');
-    if(ind) ind.textContent = th.dataset.col === sortKey ? (sortDir>0?'↑':'↓') : '↕';
-  });
-}
-
-/* ─── Render kanban ──────────────────────────────────────────────── */
-function kanbanCardHTML(r){
-  const dp = daysPassed(r.dateOfDisc);
-  const stake = (r.stakeholders||[]).map(id => personById(id)).filter(Boolean);
-  return `<div class="kcard" draggable="true" data-drag="${r.id}">
-    <div class="kc-text">${esc(r.actionItem)}</div>
-    <div class="kc-chips">
-      <span class="type-chip">${esc(r.type||'—')}</span>
-      <span class="fn-chip">${esc(r.function||'—')}</span>
-    </div>
-    <div class="kc-people">${stake.map(p=>personChipHTML(p,true)).join('') || '<span style="color:var(--muted);font-size:11.5px">No stakeholders</span>'}</div>
-    <div class="kc-foot">
-      ${daysBadge(dp)}
-      <div style="display:flex;gap:4px">
-        <button class="btn sm" data-followup="${r.id}" title="Send follow-up email">✉</button>
-        <button class="btn sm" data-tgfollowup="${r.id}" title="Send follow-up on Telegram">✈</button>
-        <button class="btn sm" data-edit="${r.id}">Edit</button>
-        <button class="btn sm" data-del="${r.id}" style="color:var(--bad)">✕</button>
-      </div>
-    </div>
-    ${r.remarks ? `<div class="kc-remarks">${esc(r.remarks)}</div>` : ''}
-    ${followUpNote(r)}
-  </div>`;
-}
-
-function renderKanban(){
-  const rows = sortedFiltered();
-  updateRowCount(rows);
-  const board = document.getElementById('kanbanView');
-  board.innerHTML = KANBAN_STATUSES.map(s => {
-    const list = rows.filter(r => r.status === s);
-    const cls = STATUS_CLASSES[s] || 's-open';
-    return `<section class="kcol" data-col="${esc(s)}">
-      <header><span class="status-sel ${cls}" style="pointer-events:none">${esc(s)}</span><span class="n">${list.length}</span></header>
-      <div class="kcards">${list.map(kanbanCardHTML).join('') || '<div class="kc-empty">No items</div>'}</div>
-    </section>`;
-  }).join('');
-
-  board.querySelectorAll('[data-followup]').forEach(b => b.onclick = () => sendFollowUp(b.dataset.followup));
-  board.querySelectorAll('[data-tgfollowup]').forEach(b => b.onclick = () => sendTelegramFollowUp(b.dataset.tgfollowup));
-  board.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openItemModal(b.dataset.edit));
-  board.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
-    if(confirm('Delete this action item?')){
-      state.items = state.items.filter(r => r.id !== b.dataset.del);
-      saveState(); render();
-      toast('Action item deleted');
-    }
-  });
-
-  board.querySelectorAll('.kcard').forEach(card => {
-    card.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', card.dataset.drag);
-      card.classList.add('dragging');
-    });
-    card.addEventListener('dragend', () => card.classList.remove('dragging'));
-  });
-  board.querySelectorAll('.kcol').forEach(col => {
-    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('dragover'); });
-    col.addEventListener('dragleave', () => col.classList.remove('dragover'));
-    col.addEventListener('drop', e => {
-      e.preventDefault(); col.classList.remove('dragover');
-      const id = e.dataTransfer.getData('text/plain');
-      const item = state.items.find(r => r.id === id);
-      const newStatus = col.dataset.col;
-      if(item && item.status !== newStatus){
-        item.status = newStatus;
-        saveState(); render();
-        toast(`Moved to ${newStatus}`);
-      }
-    });
-  });
-}
-
-function renderCurrentView(){
-  if(viewMode === 'kanban') renderKanban(); else renderTable();
-}
-
-/* ─── Stats bar ─────────────────────────────────────────────────── */
-function renderStats(){
-  const all = state.items;
-  const overdue = all.filter(r => daysPassed(r.dateOfDisc) > 21 && r.status !== 'Done').length;
-  const inprog  = all.filter(r => r.status === 'In Progress' || r.status === 'In Progress - Delayed').length;
-  const notStart= all.filter(r => r.status === 'Not Started').length;
-  const open    = all.filter(r => r.status === 'Open').length;
-  const done    = all.filter(r => r.status === 'Done').length;
-  document.getElementById('statsBar').innerHTML = `
-    <div class="stat"><span class="v">${all.length}</span><span class="l">Total<br>items</span></div>
-    <div class="stat"><span class="v" style="color:var(--info)">${inprog}</span><span class="l">In<br>Progress</span></div>
-    <div class="stat"><span class="v" style="color:var(--bad)">${notStart}</span><span class="l">Not<br>Started</span></div>
-    <div class="stat"><span class="v" style="color:var(--open)">${open}</span><span class="l">Open</span></div>
-    <div class="stat"><span class="v" style="color:var(--ok)">${done}</span><span class="l">Done</span></div>
-    <div class="stat"><span class="v" style="color:var(--bad)">${overdue}</span><span class="l">> 21 days<br>elapsed</span></div>`;
-}
-
-/* ─── People filter dropdown ─────────────────────────────────────── */
-function refreshPeopleFilter(){
-  const sel = document.getElementById('fltPerson');
-  const cur = sel.value;
-  sel.innerHTML = `<option value="">All people</option>`
-    + state.people.map(p => `<option value="${p.id}" ${cur===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
-}
-
-/* ─── People picker widget (shared by item form) ─────────────────── */
-function buildPeoplePicker(containerId, selectedIds, allPeople){
-  const wrap = document.getElementById(containerId);
-  const render = () => {
-    const sel = selectedIds;
-    wrap.innerHTML = `
-      <div class="selected-wrap" id="${containerId}_sel">
-        ${sel.map(id => { const p = allPeople.find(x=>x.id===id); return p ? `
-          <span class="pchip" style="background:${p.color}22;color:${p.color};border-color:${p.color}44">
-            <span class="av" style="background:${p.color}">${esc(initials(p.name))}</span>
-            ${esc(p.name)}<button class="rm" data-rm="${p.id}" aria-label="Remove ${esc(p.name)}">×</button>
-          </span>` : ''; }).join('')}
-        ${!sel.length ? '<span style="color:var(--muted);font-size:12px">None selected</span>' : ''}
-      </div>
-      <div class="people-options">
-        ${allPeople.map(p => `<span class="pchip po ${sel.includes(p.id)?'selected':''}"
-          data-pid="${p.id}" style="background:${p.color}22;color:${p.color};border-color:${p.color}44;cursor:pointer">
-          <span class="av" style="background:${p.color}">${esc(initials(p.name))}</span>${esc(p.name)}</span>`).join('')}
-      </div>`;
-    wrap.querySelectorAll('[data-rm]').forEach(b => {
-      b.onclick = e => { e.stopPropagation(); const i = selectedIds.indexOf(b.dataset.rm); if(i>-1){ selectedIds.splice(i,1); render(); } };
-    });
-    wrap.querySelectorAll('[data-pid]').forEach(chip => {
-      chip.onclick = () => {
-        const id = chip.dataset.pid;
-        const i = selectedIds.indexOf(id);
-        if(i>-1) selectedIds.splice(i,1); else selectedIds.push(id);
-        render();
-      };
-    });
-  };
-  render();
-}
-
-/* ─── Item modal ─────────────────────────────────────────────────── */
-function openItemModal(id){
-  const existing = id ? state.items.find(r => r.id === id) : null;
-  document.getElementById('itemModalTitle').textContent = existing ? 'Edit action item' : 'Add action item';
-  const stakeIds = existing ? [...(existing.stakeholders||[])] : [];
-  const nextIds  = existing ? [...(existing.nextStep||[])]     : [];
-
-  document.getElementById('itemModalBody').innerHTML = `
-    <div class="field"><label>Date of Discussion</label>
-      <input type="date" id="fDate" value="${existing?.dateOfDisc || todayISO()}"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="field"><label>Function</label>
-        <select id="fFunc">
-          ${['Performance Marketing','Retention Marketing','New Channels','Help from Other Departments'].map(f=>`<option ${(existing?.function||'Performance Marketing')===f?'selected':''}>${f}</option>`).join('')}
-        </select></div>
-      <div class="field"><label>Type</label>
-        <select id="fType">
-          ${['Action Pointer','Decision','Risk','FYI'].map(t=>`<option ${(existing?.type||'Action Pointer')===t?'selected':''}>${t}</option>`).join('')}
-        </select></div>
-    </div>
-    <div class="field"><label>Action Item</label>
-      <textarea id="fAction" rows="4" placeholder="Describe the action item…">${esc(existing?.actionItem||'')}</textarea></div>
-    <div class="field"><label>Stakeholders <span>(click to add/remove)</span></label>
-      <div class="people-picker" id="stakeWrap"></div></div>
-    <div class="field"><label>Next Step Owner <span>(who acts next)</span></label>
-      <div class="people-picker" id="nextWrap"></div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="field"><label>Status</label>
-        <select id="fStatus">
-          ${['In Progress','In Progress - Delayed','Not Started','Open','Done','Blocked'].map(s=>`<option ${(existing?.status||'Not Started')===s?'selected':''}>${s}</option>`).join('')}
-        </select></div>
-      <div class="field"><label>Expected Timeline / Remarks</label>
-        <input id="fRemarks" value="${esc(existing?.remarks||'')}" placeholder="e.g. Present RCA by 15 Jul"></div>
-    </div>`;
-
-  buildPeoplePicker('stakeWrap', stakeIds, state.people);
-  buildPeoplePicker('nextWrap',  nextIds,  state.people);
-
-  document.getElementById('itemOverlay').classList.add('open');
-  document.getElementById('itemCancel').onclick = () => document.getElementById('itemOverlay').classList.remove('open');
-  document.getElementById('itemSave').onclick = () => {
-    const action = document.getElementById('fAction').value.trim();
-    if(!action){ toast('Action item text is required'); return; }
-    const obj = {
-      id: existing?.id || uid(),
-      dateOfDisc: document.getElementById('fDate').value || todayISO(),
-      function: document.getElementById('fFunc').value,
-      type: document.getElementById('fType').value,
-      actionItem: action,
-      stakeholders: stakeIds,
-      nextStep: nextIds,
-      status: document.getElementById('fStatus').value,
-      remarks: document.getElementById('fRemarks').value.trim(),
-    };
-    if(existing){ Object.assign(existing, obj); } else { state.items.unshift(obj); }
-    saveState(); document.getElementById('itemOverlay').classList.remove('open');
-    render(); toast(existing ? 'Action item updated' : 'Action item added');
-  };
-}
-
-/* ─── Manage people modal ────────────────────────────────────────── */
-function renderPeoplePanel(){
-  const body = document.getElementById('peoplePanelBody');
-  body.innerHTML = `
-    <div class="manage-people">
-      <h4>Team members (${state.people.length})</h4>
-      ${state.people.map(p => `
-        <div class="person-row" data-pid="${p.id}" style="flex-direction:column;align-items:stretch;gap:8px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span class="av" style="background:${p.color};width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">${esc(initials(p.name))}</span>
-            <input class="pname-input" data-pid="${p.id}" value="${esc(p.name)}" style="flex:1;padding:5px 8px">
-            <div style="display:flex;gap:4px;flex-wrap:wrap;max-width:160px">
-              ${PALETTE.map(c => `<button class="color-swatch ${p.color===c?'active':''}" data-pid="${p.id}" data-color="${c}" style="background:${c}" title="${c}"></button>`).join('')}
-            </div>
-            <button class="btn sm danger" data-delperson="${p.id}" style="color:var(--bad);flex-shrink:0" title="Remove person">✕</button>
-          </div>
-          <input class="pemail-input" type="email" data-pid="${p.id}" value="${esc(p.email||'')}" placeholder="email@example.com (for follow-ups)" style="margin-left:38px;width:calc(100% - 38px);padding:5px 8px;font-size:12.5px">
-          <div style="display:flex;align-items:center;gap:8px;margin-left:38px;font-size:12px">
-            <span style="color:${p.telegramChatId ? 'var(--ok)' : 'var(--muted)'}">✈ ${p.telegramChatId ? 'Telegram connected' : 'Telegram not connected'}</span>
-            <button class="btn sm" data-tglink="${p.id}" style="margin-left:auto">Copy connect link</button>
-          </div>
-        </div>`).join('')}
-    </div>
-    <div id="addPersonForm" style="display:none;border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px;flex-direction:column;gap:10px">
-      <div class="field"><label>Name</label><input id="newPersonName" placeholder="Full name or role"></div>
-      <div class="field"><label>Email <span>(optional, for follow-ups)</span></label><input id="newPersonEmail" type="email" placeholder="email@example.com"></div>
-      <div class="field"><label>Colour</label>
-        <div style="display:flex;gap:5px;flex-wrap:wrap" id="newColorPalette">
-          ${PALETTE.map((c,i) => `<button class="color-swatch ${i===0?'active':''}" data-nc="${c}" style="background:${c}"></button>`).join('')}
-        </div>
-      </div>
-      <button class="btn primary sm" id="saveNewPerson">Add person</button>
-    </div>`;
-
-  // name edit
-  body.querySelectorAll('.pname-input').forEach(inp => {
-    inp.onblur = () => {
-      const p = state.people.find(x=>x.id===inp.dataset.pid);
-      if(p){ p.name = inp.value.trim() || p.name; saveState(); refreshPeopleFilter(); renderCurrentView(); }
-    };
-  });
-  // email edit
-  body.querySelectorAll('.pemail-input').forEach(inp => {
-    inp.onblur = () => {
-      const p = state.people.find(x=>x.id===inp.dataset.pid);
-      if(p){ p.email = inp.value.trim(); saveState(); }
-    };
-  });
-  // telegram connect link
-  body.querySelectorAll('[data-tglink]').forEach(b => {
-    b.onclick = async () => {
-      try{
-        const res = await fetch(`/api/telegram/link/${b.dataset.tglink}`);
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.error || 'Failed to get link');
-        await navigator.clipboard.writeText(data.url);
-        toast('Telegram connect link copied — send it to them');
-      }catch(e){
-        toast('Could not get link: ' + e.message);
-      }
-    };
-  });
-  // colour picker
-  body.querySelectorAll('.color-swatch[data-color]').forEach(sw => {
-    sw.onclick = () => {
-      const p = state.people.find(x=>x.id===sw.dataset.pid);
-      if(p){ p.color = sw.dataset.color; saveState(); renderPeoplePanel(); renderCurrentView(); }
-    };
-  });
-  // delete person
-  body.querySelectorAll('[data-delperson]').forEach(b => {
-    b.onclick = () => {
-      const pid = b.dataset.delperson;
-      if(!confirm('Remove this person? They will be removed from all action items.')) return;
-      state.people = state.people.filter(p => p.id !== pid);
-      state.items.forEach(r => {
-        r.stakeholders = (r.stakeholders||[]).filter(id=>id!==pid);
-        r.nextStep = (r.nextStep||[]).filter(id=>id!==pid);
-      });
-      saveState(); renderPeoplePanel(); refreshPeopleFilter(); renderCurrentView();
-      toast('Person removed');
-    };
-  });
-
-  // add person form toggle
-  document.getElementById('addPersonBtn').onclick = () => {
-    const f = document.getElementById('addPersonForm');
-    f.style.display = f.style.display === 'none' ? 'flex' : 'none';
-  };
-
-  let newColor = PALETTE[0];
-  body.querySelectorAll('[data-nc]').forEach(sw => {
-    sw.onclick = () => {
-      body.querySelectorAll('[data-nc]').forEach(s=>s.classList.remove('active'));
-      sw.classList.add('active');
-      newColor = sw.dataset.nc;
-    };
-  });
-
-  document.getElementById('saveNewPerson').onclick = () => {
-    const name = document.getElementById('newPersonName').value.trim();
-    if(!name){ toast('Enter a name'); return; }
-    const email = document.getElementById('newPersonEmail').value.trim();
-    const np = { id: uid(), name, color: newColor, email };
-    state.people.push(np);
-    saveState(); renderPeoplePanel(); refreshPeopleFilter();
-    toast(`${name} added`);
-  };
-}
-
-/* ─── Main render ────────────────────────────────────────────────── */
-function render(){
-  renderStats();
-  refreshPeopleFilter();
-  renderCurrentView();
-}
-
-/* ─── Toast ─────────────────────────────────────────────────────── */
-function toast(msg){
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 2500);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   IMPORT FROM MEETING NOTES — Anthropic API
-   ═══════════════════════════════════════════════════════════════════ */
-
-function showImportStep(n){
-  ['importStep1','importStep2','importStep3','importStep4'].forEach((id,i) => {
-    document.getElementById(id).classList.toggle('active', i+1 === n);
-  });
-}
-
-function closeImport(){
-  document.getElementById('importOverlay').classList.remove('open');
-  showImportStep(1);
-  document.getElementById('transcriptBox').value = '';
-}
-
-async function extractFromTranscript(){
-  const raw = document.getElementById('transcriptBox').value.trim();
-  if(!raw){ toast('Please paste some meeting notes first'); return; }
-
-  showImportStep(2);
-
-  // Cycle through loading messages while waiting
-  const msgs = [
-    'Reading transcript…',
-    'Identifying action items…',
-    'Matching names to your team…',
-    'Classifying item types…',
-    'Almost done…'
-  ];
-  let mi = 0;
-  const interval = setInterval(() => {
-    document.getElementById('thinkingMsg').textContent = msgs[Math.min(mi++, msgs.length-1)];
-  }, 1400);
-
-  const meetingDate = document.getElementById('importDate').value || todayISO();
-  const fn = document.getElementById('importFunction').value;
-  const teamList = state.people.map(p => p.name).join(', ');
-
-  const prompt = `You are an assistant that reads meeting transcripts and extracts structured action items.
-
-Meeting date: ${meetingDate}
-Function/Department: ${fn}
-Known team members: ${teamList}
-
-TRANSCRIPT:
-${raw}
-
-Extract every action item and learning/discussion point from the transcript.
-For each item, determine:
-- "type": either "Action Pointer" (someone must do something) or "Learning/Discussion" (an insight or discussion point, no clear owner action)
-- "actionItem": a clear, concise statement of the action or learning (1-2 sentences max)
-- "stakeholders": array of names from the team list above who are mentioned or responsible. Use EXACT names from the list. Empty array if none match.
-- "nextStep": array of names who own the NEXT action. Usually 1 person. Empty if unclear.
-- "status": one of "Not Started", "In Progress", "Open", "Done". Default "Not Started" for new items.
-- "remarks": any timeline, deadline, or extra context mentioned. Empty string if none.
-
-Respond ONLY with a valid JSON array. No markdown, no prose, no explanation. Example:
-[{"type":"Action Pointer","actionItem":"Follow up on vendor contract renewal","stakeholders":["Shashank"],"nextStep":["Shashank"],"status":"Not Started","remarks":"By end of week"},
- {"type":"Learning/Discussion","actionItem":"ROAS dropped significantly on Friday evening","stakeholders":[],"nextStep":[],"status":"Open","remarks":""}]`;
-
-  let extracted = [];
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    if (!resp.ok) throw new Error('API ' + resp.status);
-    const data = await resp.json();
-    const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
-    // strip any accidental markdown fences
-    const clean = text.replace(/^```[a-z]*\n?/,'').replace(/\n?```$/,'').trim();
-    extracted = JSON.parse(clean);
-    if (!Array.isArray(extracted)) throw new Error('Not an array');
-  } catch(e) {
-    console.error('AI extraction failed:', e);
-    clearInterval(interval);
-    // Graceful fallback: treat full transcript as one open item
-    extracted = [{
-      type: 'Action Pointer',
-      actionItem: 'Review meeting notes and identify action items manually',
-      stakeholders: [],
-      nextStep: [],
-      status: 'Not Started',
-      remarks: 'AI extraction unavailable — please edit this item or add items manually'
-    }];
-    toast('AI unavailable — showing fallback. You can edit items manually.');
-  }
-
-  clearInterval(interval);
-
-  // Resolve name strings → person ids
-  function resolveNames(names){
-    if (!Array.isArray(names)) return [];
-    return names.map(n => {
-      const match = state.people.find(p =>
-        p.name.toLowerCase() === n.toLowerCase() ||
-        p.name.toLowerCase().includes(n.toLowerCase()) ||
-        n.toLowerCase().includes(p.name.toLowerCase())
-      );
-      return match ? match.id : null;
-    }).filter(Boolean);
-  }
-
-  // Build review items with resolved ids
-  const reviewItems = extracted.map((item, i) => ({
-    _rid: 'r' + i,
-    type: item.type || 'Action Pointer',
-    actionItem: item.actionItem || '',
-    stakeholders: resolveNames(item.stakeholders || []),
-    nextStep: resolveNames(item.nextStep || []),
-    status: item.status || 'Not Started',
-    remarks: item.remarks || '',
-    dateOfDisc: meetingDate,
-    function: fn,
-    included: true
-  }));
-
-  renderReviewList(reviewItems);
-  document.getElementById('importSummary').innerHTML = `
-    <span class="sum-num">${reviewItems.length}</span>
-    <div>
-      <div style="font-weight:700;color:var(--ink)">action item${reviewItems.length===1?'':'s'} extracted from your notes</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px">
-        ${reviewItems.filter(r=>r.type==='Action Pointer').length} action pointers ·
-        ${reviewItems.filter(r=>r.type==='Learning/Discussion').length} learning/discussion items
-      </div>
-    </div>`;
-  showImportStep(3);
-}
-
-function renderReviewList(items){
-  const list = document.getElementById('reviewList');
-
-  const peopleOptions = state.people.map(p =>
-    `<option value="${p.id}">${esc(p.name)}</option>`).join('');
-
-  list.innerHTML = items.map((item, idx) => `
-    <div class="review-card ${item.included?'':'excluded'}" data-rid="${item._rid}">
-      <div class="rc-head">
-        <label>
-          <input type="checkbox" class="rc-check" data-idx="${idx}" ${item.included?'checked':''}>
-          <span class="rc-text">${esc(item.actionItem.length > 80 ? item.actionItem.slice(0,78)+'…' : item.actionItem)}</span>
-        </label>
-        <span class="${item.type==='Action Pointer'?'rc-type-ap':'rc-type-ld'}">${esc(item.type)}</span>
-      </div>
-      <div class="rc-body" style="${item.included?'':'opacity:.5;pointer-events:none'}">
-        <div class="field full">
-          <label>Action item text</label>
-          <textarea class="rc-field" data-idx="${idx}" data-f="actionItem">${esc(item.actionItem)}</textarea>
-        </div>
-        <div class="field">
-          <label>Type</label>
-          <select class="rc-field" data-idx="${idx}" data-f="type">
-            <option ${item.type==='Action Pointer'?'selected':''}>Action Pointer</option>
-            <option ${item.type==='Learning/Discussion'?'selected':''}>Learning/Discussion</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Status</label>
-          <select class="rc-field" data-idx="${idx}" data-f="status">
-            ${['Not Started','In Progress','In Progress - Delayed','Open','Done','Blocked']
-              .map(s=>`<option ${item.status===s?'selected':''}>${s}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field">
-          <label>Stakeholders</label>
-          <select class="rc-field" data-idx="${idx}" data-f="stakeholders" multiple size="3">
-            ${state.people.map(p=>`<option value="${p.id}" ${(item.stakeholders||[]).includes(p.id)?'selected':''}>${esc(p.name)}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field">
-          <label>Next step owner</label>
-          <select class="rc-field" data-idx="${idx}" data-f="nextStep" multiple size="3">
-            ${state.people.map(p=>`<option value="${p.id}" ${(item.nextStep||[]).includes(p.id)?'selected':''}>${esc(p.name)}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field full">
-          <label>Expected timeline / remarks</label>
-          <input class="rc-field" data-idx="${idx}" data-f="remarks" value="${esc(item.remarks)}">
-        </div>
-      </div>
-    </div>`).join('');
-
-  // wire checkboxes
-  list.querySelectorAll('.rc-check').forEach(cb => {
-    cb.onchange = () => {
-      const i = +cb.dataset.idx;
-      items[i].included = cb.checked;
-      const card = list.querySelector(`[data-rid="${items[i]._rid}"]`);
-      card.classList.toggle('excluded', !cb.checked);
-      card.querySelector('.rc-body').style.opacity = cb.checked ? '' : '.5';
-      card.querySelector('.rc-body').style.pointerEvents = cb.checked ? '' : 'none';
-    };
-  });
-
-  // wire field edits
-  list.querySelectorAll('.rc-field').forEach(el => {
-    el.addEventListener('change', () => {
-      const i = +el.dataset.idx;
-      const f = el.dataset.f;
-      if(el.tagName === 'SELECT' && el.multiple){
-        items[i][f] = [...el.selectedOptions].map(o => o.value);
-      } else {
-        items[i][f] = el.value;
-      }
-    });
-  });
-
-  // wire toggle-all
-  let allSelected = true;
-  document.getElementById('toggleAllBtn').onclick = () => {
-    allSelected = !allSelected;
-    document.getElementById('toggleAllBtn').textContent = allSelected ? 'Deselect all' : 'Select all';
-    items.forEach((item, i) => {
-      item.included = allSelected;
-      list.querySelectorAll('.rc-check')[i].checked = allSelected;
-      const card = list.querySelector(`[data-rid="${item._rid}"]`);
-      card.classList.toggle('excluded', !allSelected);
-      card.querySelector('.rc-body').style.opacity = allSelected ? '' : '.5';
-      card.querySelector('.rc-body').style.pointerEvents = allSelected ? '' : 'none';
-    });
-  };
-
-  // wire confirm import
-  document.getElementById('confirmImportBtn').onclick = () => {
-    const toAdd = items.filter(r => r.included);
-    if(!toAdd.length){ toast('Select at least one item to import'); return; }
-    toAdd.forEach(item => {
-      state.items.unshift({
-        id: uid(),
-        dateOfDisc: item.dateOfDisc,
-        function: item.function,
-        type: item.type,
-        actionItem: item.actionItem,
-        stakeholders: item.stakeholders,
-        nextStep: item.nextStep,
-        status: item.status,
-        remarks: item.remarks
-      });
-    });
-    saveState();
-    document.getElementById('doneMsg').textContent =
-      `${toAdd.length} action item${toAdd.length===1?'':'s'} added to tracker!`;
-    showImportStep(4);
-    render();
-  };
-}
-
-function openImportModal(){
-  document.getElementById('importDate').value = todayISO();
-  showImportStep(1);
-  document.getElementById('importOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('transcriptBox').focus(), 100);
-}
-
-/* ─── Init ───────────────────────────────────────────────────────── */
-async function init(){
-  const loaded = await loadState();
-  state = loaded || seed();
-  if(!loaded) saveState(); // first-ever load: persist the seed so every tab converges on it
-  document.getElementById('themeBtn').onclick = () => {
-    document.documentElement.dataset.theme = document.documentElement.dataset.theme==='dark'?'light':'dark';
-  };
-  document.getElementById('addItemBtn').onclick = () => openItemModal(null);
-  document.getElementById('managePeopleBtn').onclick = async () => {
-    try{
-      const fresh = await fetch('/api/state').then(r=>r.json());
-      if(fresh && fresh.people) state.people = fresh.people; // pick up Telegram connections made elsewhere
-    }catch(e){}
-    renderPeoplePanel();
-    document.getElementById('peopleOverlay').classList.add('open');
-  };
-  document.getElementById('peopleClose').onclick = () => document.getElementById('peopleOverlay').classList.remove('open');
-
-  // Import modal wiring
-  document.getElementById('importBtn').onclick = openImportModal;
-  document.getElementById('importClose').onclick = closeImport;
-  document.getElementById('importClose2').onclick = closeImport;
-  document.getElementById('extractBtn').onclick = extractFromTranscript;
-  document.getElementById('backToStep1').onclick = () => showImportStep(1);
-  document.getElementById('importDoneBtn').onclick = closeImport;
-
-  document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
-  document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open')); });
-  document.getElementById('searchBox').addEventListener('input', renderCurrentView);
-  ['fltStatus','fltPerson','fltFunction','fltType'].forEach(id => document.getElementById(id).addEventListener('change', renderCurrentView));
-  document.getElementById('clearFlt').onclick = () => {
-    document.getElementById('searchBox').value='';
-    ['fltStatus','fltPerson','fltFunction','fltType'].forEach(id=>document.getElementById(id).value='');
-    renderCurrentView();
-  };
-  document.querySelectorAll('#viewToggle [data-view]').forEach(b => {
-    b.onclick = () => {
-      viewMode = b.dataset.view;
-      document.querySelectorAll('#viewToggle [data-view]').forEach(x => x.classList.toggle('active', x===b));
-      document.getElementById('tableView').style.display = viewMode==='list' ? '' : 'none';
-      document.getElementById('kanbanView').style.display = viewMode==='kanban' ? 'flex' : 'none';
-      renderCurrentView();
-    };
-  });
-  document.querySelectorAll('thead th[data-col]').forEach(th => {
-    th.onclick = () => {
-      if(sortKey===th.dataset.col) sortDir*=-1; else { sortKey=th.dataset.col; sortDir=1; }
-      renderTable();
-    };
-  });
-  render();
-}
-init();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
