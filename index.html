@@ -371,6 +371,20 @@ const DEFAULT_PEOPLE = [
   {id:'q20', name:'Sonali',                   color:'#C46EA0', email:'sonali.sahu@impactguru.com'},
 ];
 
+// People from the pre-ec8f4a1 roster who aren't on the current team list (left, or no
+// current-roster match found) but are still referenced by id in older seed items below.
+// Kept under their original ids/names so those items keep showing who was actually assigned,
+// instead of silently dropping the assignment once the roster was swapped out from under them.
+const LEGACY_PEOPLE = [
+  {id:'p12', name:'Ankita',   color:'#78A87A', email:''},
+  {id:'p15', name:'Tanvika',  color:'#C77DBB', email:''},
+  {id:'p17', name:'Sandeep',  color:'#B98D3E', email:''},
+  {id:'p18', name:'Neer',     color:'#7A93C4', email:''},
+  {id:'p19', name:'Sahil',    color:'#4FA37A', email:''},
+  {id:'p20', name:'Akhlaque', color:'#C46B5C', email:''},
+  {id:'p21', name:'Dr Ajay',  color:'#8F6BC4', email:''},
+];
+
 const STATUS_CLASSES = {
   'In Progress':'s-inprogress','In Progress - Delayed':'s-delayed','Not Started':'s-notstarted','Open':'s-open','Done':'s-done','Blocked':'s-blocked'
 };
@@ -440,6 +454,36 @@ function restoreOldItems(items){
   const have = new Set(items.map(i => i.id));
   const missing = OLD_ITEMS.filter(i => !have.has(i.id));
   return missing.length ? items.concat(missing) : items;
+}
+
+// The Q1 seed items below were written against the pre-ec8f4a1 people roster (ids p1-p21).
+// When that roster was swapped for the current q1-q20 list, these ids were left unremapped,
+// so personById() silently dropped the stakeholder/next-step pills on every affected item.
+// Only remap ids confirmed to be the same person under the new roster; everything else stays
+// on its original id and resolves via LEGACY_PEOPLE instead.
+const LEGACY_ID_REMAP = {
+  p1:'q2', p2:'q4', p3:'q13', p4:'q12', p5:'q9', p6:'q7', p7:'q1', p14:'q20', p16:'q14',
+};
+// Returns the same array reference untouched if no item actually needed remapping.
+function remapLegacyIds(items){
+  const map = id => LEGACY_ID_REMAP[id] || id;
+  let changed = false;
+  const next = items.map(it => {
+    const stakeholders = (it.stakeholders||[]).map(map);
+    const nextStep = (it.nextStep||[]).map(map);
+    const same = stakeholders.length===(it.stakeholders||[]).length && stakeholders.every((v,i)=>v===it.stakeholders[i])
+              && nextStep.length===(it.nextStep||[]).length && nextStep.every((v,i)=>v===it.nextStep[i]);
+    if(same) return it;
+    changed = true;
+    return { ...it, stakeholders, nextStep };
+  });
+  return changed ? next : items;
+}
+// Adds any LEGACY_PEOPLE not already present, in place, without touching existing people.
+function restoreLegacyPeople(people){
+  const have = new Set(people.map(p => p.id));
+  const missing = LEGACY_PEOPLE.filter(p => !have.has(p.id));
+  return missing.length ? people.concat(missing) : people;
 }
 
 function seed(){
@@ -602,7 +646,7 @@ function seed(){
      actionItem:'Start emails with a Positive messaging and health update and then appeal. Since open rates are better over there',
      stakeholders:['p14','p1'], nextStep:['p3'], status:'In Progress', remarks:''},
   ];
-  return { version:SEED_VERSION, people: DEFAULT_PEOPLE, items: restoreOldItems(items) };
+  return { version:SEED_VERSION, people: restoreLegacyPeople(DEFAULT_PEOPLE), items: restoreOldItems(remapLegacyIds(items)) };
 }
 
 const uid = () => 'x' + Math.random().toString(36).slice(2,9);
@@ -1397,8 +1441,12 @@ async function init(){
   const loaded = await loadState();
   state = loaded || seed();
   if(loaded){
-    const restored = restoreOldItems(state.items);
-    if(restored !== state.items){ state.items = restored; saveState(); } // bring back older items missing from live state
+    const restoredItems = restoreOldItems(remapLegacyIds(state.items));
+    const restoredPeople = restoreLegacyPeople(state.people);
+    let changed = false;
+    if(restoredItems !== state.items){ state.items = restoredItems; changed = true; } // bring back older items missing from live state + fix stale p-id references
+    if(restoredPeople !== state.people){ state.people = restoredPeople; changed = true; } // bring back legacy people so their old assignments still resolve
+    if(changed) saveState();
   } else {
     saveState(); // first-ever load: persist the seed so every tab converges on it
   }
