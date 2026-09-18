@@ -94,14 +94,35 @@ appended to that task's `history` array with old/new value, actor, timestamp, an
 `telegram` / `system`) — append-only from the UI.
 
 ### Telegram follow-ups
-Sending a Telegram follow-up moves the task to **Waiting for Response** and records the sent message's
-Telegram `message_id`. When the recipient **replies directly to that message** in Telegram, the webhook
-matches the reply back to the exact task via that message ID — never by guessing keywords in the reply
-text — logs the response, and moves the task to **Response Received** (a safe, human-confirmable state; it
-never auto-completes a task). If a reply doesn't target a specific message, the bot falls back to "the one
-task this person is currently waiting to respond on" only if that's unambiguous; otherwise it asks the
-person to reply to the specific follow-up message. Webhook processing is idempotent (Telegram's
-`update_id` is tracked, so retried deliveries are ignored, not double-processed).
+Sending a Telegram follow-up moves the task to **Waiting for Response**, tags the message with `#<taskId>`,
+and records the sent message's Telegram `message_id`.
+
+There are two explicit, non-guessing ways a task gets matched and updated from Telegram — never by
+interpreting arbitrary sentences:
+
+1. **Reply directly to a follow-up message.** The webhook matches the reply back to the exact task via
+   Telegram's `reply_to_message` id.
+2. **Send (or reply with) `#<taskId> <keyword>`** — e.g. `#i2 done` — at any time, without needing to reply
+   to a specific message. Send `/tasks` to a connected bot to list your open tasks and their IDs.
+
+If a reply/message doesn't carry a `#taskId` tag and isn't a reply to a specific follow-up, the bot falls
+back to "the one task this person is currently waiting to respond on" only if that's unambiguous;
+otherwise it asks the person to be explicit rather than guess.
+
+Once the task is identified, the **keyword** in the message (after stripping any `#tag`) decides what
+happens:
+- An **exact match** (case-insensitive, the whole message — not a substring) against `done`/`complete`/
+  `completed` → **Completed**, `in progress`/`started`/`wip` → **In Progress**, `blocked`/`stuck` →
+  **Blocked**, `cancelled`/`canceled` → **Cancelled**. This applies immediately since it's a deliberate
+  command, not inferred from prose. (Edit `TELEGRAM_KEYWORD_STAGE` in `server.js` to add/change keywords.)
+- Anything else (a sentence, a question, etc.) is logged as the task's response as-is, and — only if the
+  task was **Waiting for Response** — moves it to **Response Received**, a safe, human-confirmable state;
+  free text never auto-completes a task.
+
+All of this is logged to the task's Telegram conversation thread and audit history (`source: "telegram"`).
+Webhook processing is idempotent (Telegram's `update_id` is tracked, so retried deliveries are ignored, not
+double-processed), and a failure to send the confirmation reply never loses the state change that was
+already computed.
 
 ### Legacy "Import from meeting notes"
 Unchanged in spirit: paste a transcript, it's sent to the Anthropic Messages API directly from the browser

@@ -557,13 +557,25 @@ function renderAll(){
 const FOLLOWUP_CC = 'sumeet.tripathy@impactguru.com';
 
 function followUpText(r){
-  const owner = personById(r.ownerId);
   return [
     `Follow-up on: "${r.actionItem}"`, ``,
     `Function: ${r.function || '—'}`, `Stage: ${r.stage}`, `Priority: ${r.priority}`,
     r.dueDate ? `Due: ${fmtDate(r.dueDate)}` : null,
     r.remarks ? `Remarks: ${r.remarks}` : null, ``,
     `Could you share a quick update on where this stands?`
+  ].filter(x => x !== null).join('\n');
+}
+
+// Telegram-specific: includes the #taskId tag and the exact-keyword format so a
+// reply (or a fresh "#taskId done" message) can be matched back to this task
+// and, for a recognized keyword, move its stage automatically.
+function followUpTelegramText(r){
+  return [
+    `#${r.id} Follow-up: "${r.actionItem}"`, ``,
+    `Function: ${r.function || '—'}`, `Stage: ${r.stage}`, `Priority: ${r.priority}`,
+    r.dueDate ? `Due: ${fmtDate(r.dueDate)}` : null,
+    r.remarks ? `Remarks: ${r.remarks}` : null, ``,
+    `Reply "done", "in progress", or "blocked" to update this task, or reply with any other note. (You can also message "#${r.id} done" anytime — send /tasks to see all your open tasks.)`
   ].filter(x => x !== null).join('\n');
 }
 
@@ -592,7 +604,7 @@ async function sendTelegramFollowUp(id){
   try{
     const res = await fetch('/api/telegram/send-followup', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ itemId: id, text: followUpText(r) })
+      body: JSON.stringify({ itemId: id, text: followUpTelegramText(r) })
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Failed to send');

@@ -11,6 +11,18 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME;
 const TELEGRAM_WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 
+// Explicit, exact-match keywords a person can send to move a task to a specific
+// stage. Deliberately NOT a substring/contains match against free text — the
+// whole message (after stripping an optional "#taskId" tag) must equal one of
+// these keywords exactly. Anything else is logged as a plain response, never
+// guessed into a stage. Add/edit keywords here — never hardcode this deeper.
+const TELEGRAM_KEYWORD_STAGE = {
+  'done': 'Completed', 'complete': 'Completed', 'completed': 'Completed',
+  'in progress': 'In Progress', 'started': 'In Progress', 'wip': 'In Progress',
+  'blocked': 'Blocked', 'stuck': 'Blocked',
+  'cancelled': 'Cancelled', 'canceled': 'Cancelled',
+};
+
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(__dirname));
 
@@ -96,10 +108,12 @@ app.post('/api/telegram/webhook', async (req, res) => {
         if (person) {
           person.telegramChatId = msg.chat.id;
           person.updatedAt = new Date().toISOString();
-          await notifySafely(msg.chat.id, `You're connected, ${person.name}! You'll now receive action-item follow-ups here.`);
+          await notifySafely(msg.chat.id, `You're connected, ${person.name}! You'll now receive action-item follow-ups here.\n\nReply "done", "in progress", "blocked", etc. to a follow-up to update its stage, or send /tasks anytime to see your open tasks and their #IDs.`);
         } else {
           await notifySafely(msg.chat.id, `Couldn't match that link to a person — ask your admin for a fresh connect link.`);
         }
+      } else if (msg.text.startsWith('/tasks')) {
+        await sendTaskList(state, msg.chat.id);
       } else {
         await handleIncomingReply(state, msg);
       }
@@ -124,20 +138,59 @@ async function notifySafely(chatId, text) {
   }
 }
 
+async function sendTaskList(state, chatId) {
+  const person = state.people.find(p => p.telegramChatId === chatId);
+  if (!person) {
+    await notifySafely(chatId, `You're not connected to a profile yet — use the connect link your admin sent you first.`);
+    return;
+  }
+  const mine = state.items.filter(i =>
+    !['Completed', 'Cancelled'].includes(i.stage) &&
+    (i.ownerId === person.id || (i.stakeholders || []).includes(person.id) || (i.nextStep || []).includes(person.id)));
+  if (!mine.length) {
+    await notifySafely(chatId, `You have no open tasks. 🎉`);
+    return;
+  }
+  const lines = mine.map(i => `#${i.id} — ${i.actionItem} (${i.stage})`);
+  await notifySafely(chatId,
+    `Your open tasks:\n\n${lines.join('\n')}\n\nSend "#taskId done" (or "in progress" / "blocked" / "cancelled") to update one, e.g. "#${mine[0].id} done".`);
+}
+
 // Associate an inbound Telegram message with a task reliably — never by guessing
-// keywords in the text. We match on the *specific message being replied to*
-// (Telegram's reply_to_message.message_id), which we recorded when the follow-up
-// was sent. Only if that's unavailable do we fall back to "the one task this
-// person is currently waiting to hear back on" — and if that's ambiguous too,
-// we ask the human to reply directly rather than guess.
+// which task from arbitrary text. Three ways, tried in order, all explicit:
+//  1. The message contains a "#taskId" tag (works whether or not it's a reply) —
+//     this is the "specific format" for updating a task without replying to a
+//     particular follow-up message.
+//  2. It's a reply to a specific follow-up message we sent (Telegram's
+//     reply_to_message.message_id, recorded when that follow-up went out).
+//  3. Otherwise, only if this person has exactly one task currently
+//     "Waiting for Response" — if that's ambiguous too, we ask them to be
+//     explicit rather than guess.
+//
+// Once the task is known, the stage is changed automatically ONLY if the
+// message (with any #tag removed) is an EXACT match for one of
+// TELEGRAM_KEYWORD_STAGE's keywords (e.g. "done", "blocked") — never inferred
+// from a sentence. Anything else is still logged as a response and, if the
+// task was "Waiting for Response", moved to the safe "Response Received"
+// stage for a human to confirm.
 async function handleIncomingReply(state, msg) {
   const now = new Date().toISOString();
   const chatId = msg.chat.id;
   const text = msg.text;
   const person = state.people.find(p => p.telegramChatId === chatId);
 
-  let item = null;
-  if (msg.reply_to_message) {
+  let item = null, remainder = text;
+  const tagMatch = text.match(/#([A-Za-z0-9_-]+)/);
+  if (tagMatch) {
+    const tagId = tagMatch[1];
+    item = state.items.find(i => i.id === tagId) || state.items.find(i => i.id.toLowerCase() === tagId.toLowerCase());
+    remainder = (text.slice(0, tagMatch.index) + text.slice(tagMatch.index + tagMatch[0].length)).trim();
+    if (!item) {
+      await notifySafely(chatId, `I couldn't find a task with ID "${tagId}". Send /tasks to see your open tasks and their IDs.`);
+      return;
+    }
+  }
+  if (!item && msg.reply_to_message) {
     const replyId = msg.reply_to_message.message_id;
     const outboxEntry = (state.telegramOutbox || []).find(o => o.chatId === chatId && o.messageId === replyId);
     if (outboxEntry) item = state.items.find(i => i.id === outboxEntry.itemId);
@@ -149,7 +202,7 @@ async function handleIncomingReply(state, msg) {
   }
 
   if (!item) {
-    await notifySafely(chatId, `Thanks — but I couldn't tell which task this relates to. Please reply directly to the specific follow-up message (long-press → Reply) so it's logged against the right task.`);
+    await notifySafely(chatId, `Thanks — but I couldn't tell which task this relates to. Reply directly to the specific follow-up message, or send "#taskId done" (see /tasks for your task IDs).`);
     return;
   }
 
@@ -162,17 +215,27 @@ async function handleIncomingReply(state, msg) {
   item.history = item.history || [];
 
   const oldStage = item.stage;
-  if (oldStage === 'Waiting for Response') {
+  const actor = person ? person.name : 'Telegram';
+  const explicitStage = TELEGRAM_KEYWORD_STAGE[remainder.trim().toLowerCase()];
+
+  let confirmation;
+  if (explicitStage && explicitStage !== oldStage) {
+    item.stage = explicitStage;
+    item.history.push({ ts: now, field: 'stage', oldValue: oldStage, newValue: explicitStage, actor, source: 'telegram' });
+    if (explicitStage === 'Completed') item.completedAt = now;
+    if (explicitStage === 'Cancelled') item.cancelledAt = now;
+    confirmation = `Marked "${String(item.actionItem).slice(0, 80)}" as ${explicitStage}.`;
+  } else if (oldStage === 'Waiting for Response') {
     // Deliberately a safe intermediate stage, not auto-"Completed" — a human confirms completion.
     item.stage = 'Response Received';
-    item.history.push({
-      ts: now, field: 'stage', oldValue: oldStage, newValue: 'Response Received',
-      actor: person ? person.name : 'Telegram', source: 'telegram',
-    });
+    item.history.push({ ts: now, field: 'stage', oldValue: oldStage, newValue: 'Response Received', actor, source: 'telegram' });
+    confirmation = `Got it — logged your response on "${String(item.actionItem).slice(0, 80)}". Thanks!`;
+  } else {
+    confirmation = `Got it — logged your response on "${String(item.actionItem).slice(0, 80)}". Thanks!`;
   }
   item.updatedAt = now;
 
-  await notifySafely(chatId, `Got it — logged your response on "${String(item.actionItem).slice(0, 80)}". Thanks!`);
+  await notifySafely(chatId, confirmation);
 }
 
 // Personal connect link for a given person id
