@@ -46,7 +46,8 @@ const PRIORITIES = ['High','Medium','Low'];
 const TELEGRAM_STATUSES = ['None','Sent','Waiting for Response','Response Received'];
 const FUNCTIONS = ['Performance Marketing','Retention Marketing','New Channels','Help from Other Departments'];
 const TYPES = ['Action Pointer','Decision','Risk','FYI'];
-const CSV_HEADERS = ['id','actionItem','description','function','type','owner','stakeholders','nextStep','priority','stage','dueDate','followUpDate','remarks'];
+const CSV_HEADERS = ['id','actionItem','description','function','type','owner','stakeholders','nextStep','priority','stage','dueDate','followUpDate','remarks','action'];
+const DELETE_ACTION_RE = /^(remove|delete)$/i;
 const STATE_VERSION = 5;
 
 /* ══════════════════════════════════════════════════════════════════
@@ -933,9 +934,14 @@ function parseCSV(text){
   if(field.length || row.length){ row.push(field); rows.push(row); }
   if(!rows.length) return [];
   const headers = rows[0].map(h => h.trim());
+  // Recognize an "action" column (any case) — e.g. a value of "Remove"/"Delete" —
+  // separately from the "actionItem" column, so hand-annotated exports (mark a
+  // row "Remove", re-upload) work without renaming anything.
+  const actionColKey = headers.find(h => h.toLowerCase() === 'action');
   return rows.slice(1).filter(r => r.some(f => f.trim()!=='')).map(r => {
     const obj = {};
     headers.forEach((h,i) => obj[h] = (r[i]||'').trim());
+    obj._deleteFlag = actionColKey ? DELETE_ACTION_RE.test(obj[actionColKey]||'') : false;
     return obj;
   });
 }
@@ -961,7 +967,8 @@ function itemToCSVRow(r){
   return {
     id: r.id, actionItem: r.actionItem, description: r.description||'', function: r.function||'', type: r.type||'',
     owner: personById(r.ownerId)?.name || '', stakeholders: names(r.stakeholders), nextStep: names(r.nextStep),
-    priority: r.priority, stage: r.stage, dueDate: r.dueDate||'', followUpDate: r.followUpDate||'', remarks: r.remarks||''
+    priority: r.priority, stage: r.stage, dueDate: r.dueDate||'', followUpDate: r.followUpDate||'', remarks: r.remarks||'',
+    action: '' // type "remove" here and re-import to delete that task
   };
 }
 
@@ -988,6 +995,22 @@ let csvPreviewRows = [];
 function validateCSVRow(raw, seenIds){
   const notes = [];
   let status = 'new';
+
+  if(raw._deleteFlag){
+    const id = raw.id || '';
+    if(!id) notes.push('Delete requested but no Task ID given');
+    else if(seenIds.has(id)) notes.push(`Duplicate Task ID "${id}" within this file`);
+    else if(!state.items.some(it => it.id === id)) notes.push(`Cannot delete: unknown Task ID "${id}"`);
+    else seenIds.add(id);
+    return {
+      raw, notes, status: notes.length ? 'invalid' : 'delete', id: id || uid(),
+      actionItem: raw.actionItem || (state.items.find(it=>it.id===id)?.actionItem) || '',
+      description:'', function:'', type:'', ownerId:null, stakeholders:[], nextStep:[],
+      priority:'Medium', stage: state.items.find(it=>it.id===id)?.stage || 'New',
+      dueDate:null, followUpDate:null, remarks:''
+    };
+  }
+
   const actionItem = raw.actionItem || '';
   if(!actionItem){ notes.push('Missing task text'); }
 
@@ -1036,11 +1059,11 @@ function validateCSVRow(raw, seenIds){
 
 function renderCSVPreview(){
   const rows = csvPreviewRows;
-  const counts = { new:0, update:0, invalid:0, duplicate:0 };
+  const counts = { new:0, update:0, invalid:0, duplicate:0, delete:0 };
   rows.forEach(r => counts[r.status]++);
   document.getElementById('csvSummary').innerHTML = [
     ['Total', rows.length, ''], ['New', counts.new, 'color:var(--ok)'], ['Update', counts.update, 'color:var(--info)'],
-    ['Invalid', counts.invalid, 'color:var(--bad)'], ['Duplicate', counts.duplicate, 'color:var(--warn)'],
+    ['Delete', counts.delete, 'color:var(--bad)'], ['Invalid', counts.invalid, 'color:var(--bad)'], ['Duplicate', counts.duplicate, 'color:var(--warn)'],
   ].map(([l,v,style]) => `<div class="cs-tile"><div class="v" style="${style}">${v}</div><div class="l">${l}</div></div>`).join('');
 
   const table = document.getElementById('csvPreviewTable');
@@ -1071,8 +1094,14 @@ function handleCSVFile(file){
 
 function confirmCSVImport(){
   const actor = getCurrentUser();
-  let created = 0, updated = 0;
+  let created = 0, updated = 0, deleted = 0;
+  const toDelete = new Set(csvPreviewRows.filter(r => r.status === 'delete').map(r => r.id));
+  if(toDelete.size){
+    state.items = state.items.filter(it => !toDelete.has(it.id));
+    deleted = toDelete.size;
+  }
   csvPreviewRows.forEach(r => {
+    if(r.status === 'delete') return; // handled above
     if(r.status === 'new'){
       const obj = {
         id: r.id, actionItem: r.actionItem, description: r.description, function: r.function, type: r.type,
@@ -1100,7 +1129,7 @@ function confirmCSVImport(){
   });
   saveState(); renderAll();
   document.getElementById('csvOverlay').classList.remove('open');
-  toast(`CSV import: ${created} created, ${updated} updated`);
+  toast(`CSV import: ${created} created, ${updated} updated, ${deleted} deleted`);
 }
 
 function exportCSV(scope){

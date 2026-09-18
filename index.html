@@ -210,6 +210,7 @@ td.status-cell{white-space:nowrap}
 .csv-row-update{background:var(--info-bg)}
 .csv-row-invalid{background:var(--bad-bg)}
 .csv-row-duplicate{background:var(--warn-bg)}
+.csv-row-delete{background:var(--bad-bg);text-decoration:line-through;opacity:.75}
 .import-step .mf{border:none;padding:0;justify-content:flex-end}
 
 @media (max-width:640px){
@@ -328,7 +329,9 @@ td.status-cell{white-space:nowrap}
     <div class="import-step active" id="csvStep1">
       <div style="font-size:13px;color:var(--muted);line-height:1.6">
         Upload a CSV of action items. Rows with an existing Task ID update that task; rows without one (or with an
-        unrecognized ID) create a new task. Nothing is saved until you confirm the preview.
+        unrecognized ID) create a new task. To delete tasks, add an <b>Action</b> column and type
+        <b>Remove</b> (or <b>Delete</b>) next to the rows to remove, keeping their Task ID — exactly what
+        exporting, annotating, and re-importing produces. Nothing is saved until you confirm the preview.
       </div>
       <div class="drop-zone" id="csvDropZone">
         <input type="file" id="csvFileInput" accept=".csv" style="display:none">
